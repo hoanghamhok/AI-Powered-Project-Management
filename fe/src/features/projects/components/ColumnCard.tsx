@@ -38,7 +38,7 @@ export function ColumnCard({
   const [editingTaskAssignees, setEditingTaskAssignees] = useState<string[]>([]);
 
   return (
-    <div className="w-72 shrink-0 bg-gray-100 rounded-2xl p-3">
+    <div className=" bg-gray-100 rounded-2xl p-3">
       {/*Column Header*/}
       {editingColumn ? (
         <div className="space-y-2 mb-3">

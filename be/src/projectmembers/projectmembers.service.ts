@@ -100,8 +100,8 @@ export class ProjectmembersService {
         return this.removeMember(projectId, requesterId, requesterId);
     }
 
-    async setProjectMemberRole(projectId: string,targetUserId: string,role: ProjectRole,currentUserId: string
-    ) {
+    async setProjectMemberRole(projectId: string,targetUserId: string,role: ProjectRole,currentUserId: string) {
+
         const currentUser = await this.prisma.user.findUnique({
             where: { id: currentUserId },
             select: { role: true },

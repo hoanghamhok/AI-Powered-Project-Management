@@ -51,7 +51,7 @@ const AuthPage = () => {
     <div className="min-h-screen bg-gradient-to-br flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <div className="text-center mb-6 flex items-center">
-          <ClipboardList className="w-14 h-14 ml-10 mr-4 text-purple-600 mb-4" />
+          <ClipboardList className="w-14 h-14 ml-10 mr-4 text-blue-600 mb-4" />
           <h1 className="text-3xl font-bold text-gray-800">Task Management</h1>
         </div>
 
@@ -61,7 +61,7 @@ const AuthPage = () => {
             onClick={() => setMode('login')}
             className={`flex-1 py-2 rounded-lg font-semibold ${
               mode === 'login'
-                ? 'bg-purple-600 text-white'
+                ? 'bg-blue-600 text-white'
                 : 'bg-gray-200'
             }`}
           >
@@ -71,7 +71,7 @@ const AuthPage = () => {
             onClick={() => setMode('register')}
             className={`flex-1 py-2 rounded-lg font-semibold ${
               mode === 'register'
-                ? 'bg-purple-600 text-white'
+                ? 'bg-blue-600 text-white'
                 : 'bg-gray-200'
             }`}
           >
@@ -92,7 +92,7 @@ const AuthPage = () => {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg border focus:border-purple-500 outline-none"
+            className="w-full px-4 py-3 rounded-lg border focus:border-blue-500 outline-none"
           />
 
           {mode === 'register' && (
@@ -101,7 +101,7 @@ const AuthPage = () => {
               placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border focus:border-purple-500 outline-none"
+              className="w-full px-4 py-3 rounded-lg border focus:border-blue-500 outline-none"
             />
           )}
 
@@ -110,7 +110,7 @@ const AuthPage = () => {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg border focus:border-purple-500 outline-none"
+            className="w-full px-4 py-3 rounded-lg border focus:border-blue-500 outline-none"
           />
 
           {mode === 'register' && (
@@ -119,7 +119,7 @@ const AuthPage = () => {
               placeholder="Confirm Password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border focus:border-purple-500 outline-none"
+              className="w-full px-4 py-3 rounded-lg border focus:border-blue-500 outline-none"
             />
           )}
 
@@ -127,7 +127,7 @@ const AuthPage = () => {
             <div className="text-right">
               <Link
                 to="/forgot-password"
-                className="text-sm text-purple-600 hover:underline"
+                className="text-sm text-blue-600 hover:underline"
               >
                 Quên mật khẩu?
               </Link>
@@ -137,7 +137,7 @@ const AuthPage = () => {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 disabled:opacity-50"
+            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
           >
             {loading
               ? 'Processing...'

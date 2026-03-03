@@ -93,7 +93,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="h-full flex flex-col">
 
           {/* HEADER */}
-          <div className="p-4 border-b">
+          <div className="p-4 border-b w-">
             <button 
               onClick={() => setIsNewProjectModalOpen(true)}
               className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"

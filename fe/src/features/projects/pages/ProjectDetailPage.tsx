@@ -14,33 +14,53 @@ import { ColumnCard } from "../components/ColumnCard";
 import { useDnd } from "../../tasks/hooks/useDnd";
 import { LeaveProject } from "../components/LeaveProject";
 
-
 export default function ProjectDetailPage() {
-  const [isAdding,setIsAdding] = useState(false);
-  const [columnTitle,setColumnTitle] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
+  const [columnTitle, setColumnTitle] = useState("");
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<{ type: "column" | "task"; id: string; name: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    type: "column" | "task";
+    id: string;
+    name: string;
+  } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
- 
+
   const { projectId } = useParams<{ projectId: string }>();
-  const {user} = useAuth();
+  const { user } = useAuth();
+
   if (!projectId) {
     return <div className="p-6">Invalid project</div>;
   }
-  const {move} = useTask(projectId)
+
+  const { move } = useTask(projectId);
+
   const {
     data: projectRes,
     isLoading: projectLoading,
     isError: projectError,
   } = useProjectDetails(projectId);
 
-  const { data: membersRes, refetch: refetchMembers } = useProjectMembers(projectId);
+  const { data: membersRes, refetch: refetchMembers } =
+    useProjectMembers(projectId);
 
-  const { columns, loading: columnLoading,add:addColumn, edit: editColumn, remove: deleteColumn, markAsDone: markColumnAsDone } = useColumn(projectId);
-  const { byColumn, loading: taskLoading,add:addTask, edit: editTask, remove: deleteTask } = useTask(projectId);
+  const {
+    columns,
+    loading: columnLoading,
+    add: addColumn,
+    edit: editColumn,
+    remove: deleteColumn,
+    markAsDone: markColumnAsDone,
+  } = useColumn(projectId);
+
+  const {
+    byColumn,
+    loading: taskLoading,
+    add: addTask,
+    edit: editTask,
+    remove: deleteTask,
+  } = useTask(projectId);
 
   if (projectLoading || columnLoading || taskLoading) {
     return <div className="p-6">Loading project...</div>;
@@ -51,20 +71,16 @@ export default function ProjectDetailPage() {
   }
 
   const project = projectRes.data;
-  
-  // Check role current user
   const members = membersRes?.data ?? [];
-
-  const { isAdmin, canSetOwner } =useProjectRole(members, user ?? undefined);
+  const { isAdmin, canSetOwner } = useProjectRole(members, user ?? undefined);
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
-    
-    setIsDeleting(true);  
+    setIsDeleting(true);
     try {
       if (deleteTarget.type === "column") {
         await deleteColumn(deleteTarget.id);
-      } else if (deleteTarget.type === "task") {
+      } else {
         await deleteTask(deleteTarget.id);
       }
       setDeleteConfirmOpen(false);
@@ -74,18 +90,20 @@ export default function ProjectDetailPage() {
     }
   };
 
-  const handleDragEnd = useDnd({  
+  const handleDragEnd = useDnd({
     columns,
     byColumn,
     move,
   });
-  
 
   return (
     <DragContextProvider onDragEnd={handleDragEnd}>
+      {/* Modals */}
       <ConfirmDeleteModal
         isOpen={deleteConfirmOpen}
-        title={deleteTarget?.type === "column" ? "Delete Column" : "Delete Task"}
+        title={
+          deleteTarget?.type === "column" ? "Delete Column" : "Delete Task"
+        }
         message={
           deleteTarget?.type === "column"
             ? `Are you sure you want to delete the column "${deleteTarget?.name}" and all its tasks?`
@@ -101,33 +119,34 @@ export default function ProjectDetailPage() {
         }}
       />
 
-      <InviteMemberModal 
+      <InviteMemberModal
         projectId={projectId}
         isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}
         onSuccess={() => refetchMembers()}
       />
-      
-      {/*Header*/}
-      <header className="px-6 py-4 bg-white border-b flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0">
+
+      {/* Header */}
+      <header className="px-4 sm:px-6 py-4 bg-white border-b flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-semibold truncate">{project.name}</h1>
-          <p className="text-gray-500 text-sm truncate">{project.description}</p>
+          <p className="text-gray-500 text-sm truncate">
+            {project.description}
+          </p>
         </div>
 
-        <div className="flex items-center gap-3 ml-auto">
+        <div className="flex items-center gap-3">
           <MembersAvatar
             projectId={projectId}
             isAdmin={isAdmin}
             canSetOwner={canSetOwner}
             onInviteClick={() => setIsInviteModalOpen(true)}
           />
-
           <LeaveProject projectId={projectId} />
         </div>
       </header>
 
-      {/*Error*/}
+      {/* Error */}
       {errorMessage && (
         <div className="px-6 py-3 bg-red-50 border-b border-red-200 flex justify-between items-center">
           <span className="text-red-700 text-sm">{errorMessage}</span>
@@ -140,11 +159,20 @@ export default function ProjectDetailPage() {
         </div>
       )}
 
-      {/* Board*/}
-      <main className="flex-1">
-        <div className="flex gap-4 p-6 overflow-x-auto snap-x snap-mandatory">
-          {columns.map(column => (
-            <div key={column.id} className="w-64 sm:w-72 shrink-0 snap-start">
+      {/* ===== BOARD GRID ===== */}
+      <main className="flex-1 overflow-y-auto">
+        <div
+          className="
+            p-4
+            grid
+            grid-cols-1
+            md:grid-cols-2
+            xl:grid-cols-[repeat(auto-fit,minmax(280px,1fr))]
+            gap-4
+          "
+        >
+          {columns.map((column) => (
+            <div key={column.id} className="w-full">
               <ColumnCard
                 column={column}
                 tasks={byColumn[column.id] ?? []}
@@ -157,8 +185,8 @@ export default function ProjectDetailPage() {
                   setDeleteTarget({ type: "column", id, name });
                   setDeleteConfirmOpen(true);
                 }}
-                addTask={async (columnId, title, projId, description, assigneeIds, dueDate) => {
-                  await addTask(columnId, title, projId, description, assigneeIds, dueDate);
+                addTask={async (columnId, title, projectId, description, assigneeIds, dueDate) => {
+                  await addTask(columnId, title, projectId, description, assigneeIds, dueDate);
                 }}
                 editTask={editTask}
                 deleteTask={(id, title) => {
@@ -168,8 +196,9 @@ export default function ProjectDetailPage() {
               />
             </div>
           ))}
+
           {/* Add column */}
-          <div className="w-64 sm:w-72 shrink-0 snap-start">
+          <div className="w-full">
             {isAdding ? (
               <div className="bg-gray-100 p-3 rounded-lg space-y-2">
                 <input
@@ -177,11 +206,9 @@ export default function ProjectDetailPage() {
                   value={columnTitle}
                   onChange={(e) => setColumnTitle(e.target.value)}
                   placeholder="Column title"
-                  className="w-full px-2 py-1 rounded border
-                            focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full px-2 py-1 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      if (!columnTitle.trim()) return;
+                    if (e.key === "Enter" && columnTitle.trim()) {
                       addColumn(columnTitle.trim());
                       setColumnTitle("");
                       setIsAdding(false);
@@ -192,7 +219,6 @@ export default function ProjectDetailPage() {
                     }
                   }}
                 />
-
                 <div className="flex gap-2">
                   <button
                     onClick={() => {
@@ -205,7 +231,6 @@ export default function ProjectDetailPage() {
                   >
                     Add
                   </button>
-
                   <button
                     onClick={() => {
                       setIsAdding(false);
@@ -220,8 +245,7 @@ export default function ProjectDetailPage() {
             ) : (
               <button
                 onClick={() => setIsAdding(true)}
-                className="w-full h-12 border-2 border-dashed rounded-lg
-                          text-gray-500 hover:bg-gray-100"
+                className="w-full h-12 border-2 border-dashed rounded-lg text-gray-500 hover:bg-gray-100"
               >
                 + Add column
               </button>

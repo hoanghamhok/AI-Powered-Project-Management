@@ -26,7 +26,7 @@ export const AdminLayout = () => {
                         <span className="font-medium">Dashboard</span>
                     </Link>
 
-                    <Link
+                    {/* <Link
                         to="/admin/users"
                         className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive("/admin/users")
                                 ? "bg-blue-50 text-blue-600"
@@ -35,7 +35,7 @@ export const AdminLayout = () => {
                     >
                         <Users size={20} />
                         <span className="font-medium">Users</span>
-                    </Link>
+                    </Link> */}
                 </nav>
 
                 <div className="p-4 border-t">
