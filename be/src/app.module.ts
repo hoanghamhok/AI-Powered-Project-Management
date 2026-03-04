@@ -14,6 +14,7 @@ import { MailModule } from './mail/mail.module';
 import { NotificationsController } from './notifications/notifications.controller';
 import { NotificationsService } from './notifications/notifications.service';
 import { NotificationsModule } from './notifications/notifications.module';
+import { CommentsModule } from './comment/comment.module';
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
@@ -30,7 +31,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     ColumnsModule,
     require('./invites/invites.module').InvitesModule,
     MailModule,
-    NotificationsModule
+    NotificationsModule,
+    CommentsModule
   ],
   controllers: [NotificationsController],
   providers: [AppService, NotificationsService],

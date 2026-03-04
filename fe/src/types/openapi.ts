@@ -68,7 +68,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/users/all": {
+    "/users": {
         parameters: {
             query?: never;
             header?: never;
@@ -98,6 +98,22 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/users/{id}/role": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["UsersController_updateUserRole"];
         trace?: never;
     };
     "/auth/register": {
@@ -180,14 +196,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/tasks/all": {
+    "/auth/google/callback": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["TasksController_getTask"];
+        get: operations["AuthController_googleCallback"];
         put?: never;
         post?: never;
         delete?: never;
@@ -196,7 +212,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/tasks/create": {
+    "/auth/google": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AuthController_googleAuth"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/users/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -204,6 +236,22 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["AuthController_DeleteUser"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["TasksController_getTask"];
         put?: never;
         post: operations["TasksController_create"];
         delete?: never;
@@ -276,6 +324,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/projects/all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ProjectsController_getAllProjects"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/projects/{id}": {
         parameters: {
             query?: never;
@@ -286,13 +350,13 @@ export interface paths {
         get: operations["ProjectsController_getProjectByID"];
         put?: never;
         post?: never;
-        delete?: never;
+        delete: operations["ProjectsController_deleteProject"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/projects/create": {
+    "/projects": {
         parameters: {
             query?: never;
             header?: never;
@@ -308,39 +372,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/projects/details/{projectId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["ProjectsController_getProjectDetails"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/projects/{projectId}/members/{targetUserId}/role": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: operations["ProjectsController_setMemberRole"];
-        trace?: never;
-    };
-    "/projects/{projectId}/update": {
+    "/projects/{id}/update": {
         parameters: {
             query?: never;
             header?: never;
@@ -354,22 +386,6 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["ProjectsController_updateProject"];
-        trace?: never;
-    };
-    "/projects/remove/{projectId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete: operations["ProjectsController_deleteProject"];
-        options?: never;
-        head?: never;
-        patch?: never;
         trace?: never;
     };
     "/invites/{projectId}/invite": {
@@ -415,6 +431,22 @@ export interface paths {
         put?: never;
         post: operations["InvitesController_declineInvitation"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invites/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["InvitesController_remove"];
         options?: never;
         head?: never;
         patch?: never;
@@ -468,20 +500,20 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/columns/project/{projectId}": {
+    "/projectmembers/{projectId}/members/{targetUserId}/role": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["ColumnsController_getByProject"];
+        get?: never;
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["ProjectmembersController_setMemberRole"];
         trace?: never;
     };
     "/columns": {
@@ -491,7 +523,23 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["ColumnsController_getTask"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/columns/project/{projectId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ColumnsController_getByProject"];
         put?: never;
         post: operations["ColumnsController_create"];
         delete?: never;
@@ -548,6 +596,38 @@ export interface paths {
         patch: operations["ColumnsController_close"];
         trace?: never;
     };
+    "/tasks/{taskId}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CommentsController_getTaskComments"];
+        put?: never;
+        post: operations["CommentsController_createComment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["CommentsController_deleteComment"];
+        options?: never;
+        head?: never;
+        patch: operations["CommentsController_updateComment"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -563,6 +643,11 @@ export interface components {
              * @example hoangminh
              */
             username?: string;
+            /**
+             * @description User full name
+             * @example Hoang Minh
+             */
+            fullname?: string;
             /**
              * @description User password
              * @example password123
@@ -609,6 +694,7 @@ export interface components {
             title?: string;
             description?: string;
             assigneeIds?: string[];
+            dueDate?: string;
         };
         MoveTaskDto: {
             columnId: string;
@@ -620,19 +706,19 @@ export interface components {
             ownerId: string;
             description: string;
         };
-        SetMemberRoleDto: {
-            /**
-             * @example ADMIN
-             * @enum {string}
-             */
-            role: "OWNER" | "ADMIN" | "MEMBER";
-        };
         UpdateProjectDto: {
             title?: string;
             description?: string;
         };
         CreateInvitationDto: {
             email: string;
+        };
+        SetMemberRoleDto: {
+            /**
+             * @example ADMIN
+             * @enum {string}
+             */
+            role: "OWNER" | "ADMIN" | "MEMBER";
         };
         CreateColumnDto: {
             title: string;
@@ -643,6 +729,13 @@ export interface components {
             position: number;
             closed: boolean;
         };
+        CommentResponseDto: Record<string, never>;
+        CreateCommentDto: {
+            content: string;
+            parentId?: string;
+            mentions?: string[];
+        };
+        UpdateCommentDto: Record<string, never>;
     };
     responses: never;
     parameters: never;
@@ -692,7 +785,9 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                notiId: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -740,6 +835,25 @@ export interface operations {
         };
     };
     UsersController_getUserById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_updateUserRole: {
         parameters: {
             query?: never;
             header?: never;
@@ -870,6 +984,59 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ResetPassWordResponseDto"];
                 };
+            };
+        };
+    };
+    AuthController_googleCallback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_googleAuth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_DeleteUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                targetUserId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -1031,12 +1198,48 @@ export interface operations {
             };
         };
     };
+    ProjectsController_getAllProjects: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ProjectsController_getProjectByID: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProjectsController_deleteProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
             };
             cookie?: never;
         };
@@ -1071,49 +1274,6 @@ export interface operations {
             };
         };
     };
-    ProjectsController_getProjectDetails: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                projectId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ProjectsController_setMemberRole: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                projectId: string;
-                targetUserId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetMemberRoleDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     ProjectsController_updateProject: {
         parameters: {
             query?: never;
@@ -1128,25 +1288,6 @@ export interface operations {
                 "application/json": components["schemas"]["UpdateProjectDto"];
             };
         };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ProjectsController_deleteProject: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                projectId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
         responses: {
             200: {
                 headers: {
@@ -1217,6 +1358,25 @@ export interface operations {
             };
         };
     };
+    InvitesController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ProjectmembersController_getProjectMembers: {
         parameters: {
             query?: never;
@@ -1268,6 +1428,47 @@ export interface operations {
         requestBody?: never;
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProjectmembersController_setMemberRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
+                targetUserId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetMemberRoleDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ColumnsController_getTask: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1386,6 +1587,94 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CommentsController_getTaskComments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                taskId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommentResponseDto"][];
+                };
+            };
+        };
+    };
+    CommentsController_createComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                taskId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCommentDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommentResponseDto"];
+                };
+            };
+        };
+    };
+    CommentsController_deleteComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CommentsController_updateComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCommentDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {

@@ -34,6 +34,7 @@ model User {
   username             String          @unique
   fullName             String
   avatarUrl            String?
+  avatarPublicId       String?
   email                String          @unique
   password             String?
   provider             AuthProvider    @default(LOCAL)

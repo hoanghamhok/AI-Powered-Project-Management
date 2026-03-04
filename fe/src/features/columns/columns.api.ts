@@ -1,6 +1,5 @@
 import api from "../../api/client"
 
-// export const fetchColumns = () => api.get("/columns");
 export const fetchColumnsByProject = (id:string) => api.get(`/columns/project/${id}`)
 export const createColumn = (data: { title: string;projectId:string }) =>
   api.post("/columns", data);

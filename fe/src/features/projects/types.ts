@@ -1,7 +1,7 @@
 import type { paths } from "../../types/openapi"
 
 export type CreateProjectRequest =
-  paths["/projects/create"]["post"]["requestBody"]["content"]["application/json"];
+  paths["/projects"]["post"]["requestBody"]["content"]["application/json"];
 
 export interface Project {
   id: string;

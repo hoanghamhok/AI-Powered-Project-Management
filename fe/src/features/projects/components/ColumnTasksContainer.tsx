@@ -24,6 +24,7 @@ interface ColumnTasksContainerProps {
   ) => Promise<void>;
   onEditTask: (taskId: string) => void;
   onDeleteTask: (taskId: string, taskTitle: string) => void;
+  onOpenTaskDetail: (task: Task) => void;
 }
 
 export function ColumnTasksContainer({
@@ -36,6 +37,7 @@ export function ColumnTasksContainer({
   addTask,
   onEditTask,
   onDeleteTask,
+  onOpenTaskDetail
 }: ColumnTasksContainerProps) {
   const { setNodeRef } = useDroppable({ id: columnId });
 
@@ -65,6 +67,7 @@ export function ColumnTasksContainer({
               assignees={assignees}
               onEdit={() => onEditTask(task.id)}
               onDelete={() => onDeleteTask(task.id, task.title)}
+               onOpenDetail={onOpenTaskDetail}
             />
           )
         )}

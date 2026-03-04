@@ -5,7 +5,7 @@ export const tasksAPI = {
     getAll:() =>
         api.get(`/tasks/all`),
     create: (data: CreateTaskRequest) =>
-        api.post(`/tasks/create`, data),
+        api.post(`/tasks`, data),
     update:(id:string,data:UpdateTaskRequest) =>
         api.patch(`/tasks/${id}`,data),
     delete:(id:string) =>

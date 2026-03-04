@@ -25,6 +25,8 @@ export interface User {
   email: string;
   role: 'USER' | 'SUPER_ADMIN';
   createdAt?: string;
+  fullName?: string;
+  avatarUrl?: string;
 }
 export interface AuthContextType {
   user: User | null;
@@ -34,4 +36,5 @@ export interface AuthContextType {
   login: (data: LoginRequest) => Promise<LoginResult>;
   register: (data: RegisterRequest) => Promise<RegisterResult>;
   logout: () => void;
+  updateAvatar: (file: File) => Promise<void>;
 }

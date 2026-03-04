@@ -141,11 +141,17 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
                 onClick={() => setShowUserMenu(v => !v)}
                 className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-lg"
               >
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white">
-                  {loading
-                    ? "…"
-                    : user.username?.charAt(0).toUpperCase()}
-                </div>
+                {user.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.username}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                    {loading ? "…" : user.username?.charAt(0).toUpperCase()}
+                  </div>
+                )}
               </button>
 
               {showUserMenu && (

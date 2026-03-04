@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ColumnTasksContainer } from "./ColumnTasksContainer";
-
+import type { Task } from "../../tasks/types";
 interface ColumnCardProps {
   column: any;
   tasks: any[];
@@ -14,6 +14,7 @@ interface ColumnCardProps {
   addTask: (columnId: string, title: string, projectId: string, description: string, assigneeIds: string[], dueDate?: string) => Promise<void>;
   editTask: (id: string, data: any) => void;
   deleteTask: (id: string, title: string) => void;
+  onOpenTaskDetail: (task: Task) => void;
 }
 
 export function ColumnCard({
@@ -28,6 +29,7 @@ export function ColumnCard({
   addTask,
   editTask,
   deleteTask,
+  onOpenTaskDetail
 }: ColumnCardProps) {
   const [editingColumn, setEditingColumn] = useState(false);
   const [columnTitle, setColumnTitle] = useState(column.title);
@@ -123,6 +125,7 @@ export function ColumnCard({
         editingTaskId={editingTaskId}
         assignees={members}
         addTask={addTask}
+        onOpenTaskDetail={onOpenTaskDetail}
         renderEditForm={(task) => (
           <div className="bg-white p-2 rounded shadow-sm space-y-2">
             <input

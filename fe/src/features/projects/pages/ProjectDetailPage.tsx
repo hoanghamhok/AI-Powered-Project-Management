@@ -13,12 +13,15 @@ import { DragContextProvider } from "../components/DragContextProvider";
 import { ColumnCard } from "../components/ColumnCard";
 import { useDnd } from "../../tasks/hooks/useDnd";
 import { LeaveProject } from "../components/LeaveProject";
+import type { Task } from "../../tasks/types";
+import { TaskDetailModal } from "../../tasks/components/TaskDetailModal";
 
 export default function ProjectDetailPage() {
   const [isAdding, setIsAdding] = useState(false);
   const [columnTitle, setColumnTitle] = useState("");
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{
     type: "column" | "task";
     id: string;
@@ -181,6 +184,7 @@ export default function ProjectDetailPage() {
                 projectId={projectId}
                 markColumnAsDone={markColumnAsDone}
                 editColumn={editColumn}
+                onOpenTaskDetail={(task) => setSelectedTask(task)}
                 deleteColumn={(id, name) => {
                   setDeleteTarget({ type: "column", id, name });
                   setDeleteConfirmOpen(true);
@@ -253,6 +257,12 @@ export default function ProjectDetailPage() {
           </div>
         </div>
       </main>
+      {selectedTask && (
+        <TaskDetailModal
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+        />
+      )}
     </DragContextProvider>
   );
 }

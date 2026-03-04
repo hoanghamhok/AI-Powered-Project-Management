@@ -1,10 +1,9 @@
 import type { Task } from "../types";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 
 interface TaskCardProps {
   task: Task;
@@ -28,6 +27,7 @@ export function TaskCard({
   assignees = [],
   onEdit,
   onDelete,
+  onOpenDetail,
 }: TaskCardProps) {
   const {
     attributes,
@@ -43,7 +43,16 @@ export function TaskCard({
     transition,
   };
 
-  const taskAssignees = assignees.filter(a =>
+  dayjs.extend(utc);
+  dayjs.extend(timezone);
+
+  const dueDatetoString = task.dueDate
+    ? dayjs(task.dueDate)
+        .tz("Asia/Ho_Chi_Minh")
+        .format("DD/MM/YYYY HH:mm:ss")
+    : "";
+
+  const taskAssignees = assignees.filter((a) =>
     task.assigneeIds?.includes(a.userId)
   );
 
@@ -69,34 +78,45 @@ export function TaskCard({
   const getMemberName = (member: any) =>
     member.user?.username || member.name || "Unknown";
 
-  dayjs.extend(utc);
-  dayjs.extend(timezone);
-  const dueDatetoString = dayjs(task.dueDate).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss');
   return (
     <div
       ref={setNodeRef}
       style={style}
       data-taskid={task.id}
       onClick={() => onOpenDetail(task)}
-      className={`bg-white p-2.5 rounded-2xl shadow-sm hover:shadow transition flex flex-col justify-between group cursor-grab active:cursor-grabbing ${
+      className={`bg-white p-2.5 rounded-2xl shadow-sm hover:shadow transition flex flex-col justify-between group ${
         isDragging ? "opacity-50 ring-2 ring-blue-500" : ""
       }`}
     >
-      <div {...attributes} {...listeners}>
+      {/* DRAG HANDLE */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing"
+      >
         <div className="text-sm font-medium text-gray-900">{task.title}</div>
-        
-        {task.description && (
-          <p className="text-xs text-gray-600 mb-2 line-clamp-2">
-            {task.description}
-          </p>
-        )}
-        <div className="text-xs text-gray-500 italic">{task.dueDate ? dueDatetoString : ""}</div>
       </div>
 
+      {/* DESCRIPTION */}
+      {task.description && (
+        <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+          {task.description}
+        </p>
+      )}
+
+      {/* DUE DATE */}
+      {dueDatetoString && (
+        <div className="text-xs text-gray-500 italic mb-2">
+          {dueDatetoString}
+        </div>
+      )}
+
+      {/* FOOTER */}
       <div className="flex justify-between items-end">
+        {/* ACTIONS */}
         <div className="opacity-0 group-hover:opacity-100 transition flex gap-1">
           <button
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               onEdit();
             }}
@@ -104,8 +124,9 @@ export function TaskCard({
           >
             Edit
           </button>
+
           <button
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               onDelete();
             }}
@@ -115,22 +136,35 @@ export function TaskCard({
           </button>
         </div>
 
+        {/* ASSIGNEES */}
         {taskAssignees.length > 0 && (
           <div className="flex -space-x-2">
-            {taskAssignees.map((assignee, index) => (
-              <div
-                key={assignee.userId}
-                className={`w-6 h-6 ${getAvatarColor(
-                  index
-                )} rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white cursor-pointer hover:scale-110 transition-transform relative group/avatar`}
-              >
-                {getInitials(assignee)}
+            {taskAssignees.map((assignee, index) => {
+              const avatar = (assignee as any).avatar || (assignee.user as any)?.avatarUrl || (assignee.user as any)?.avatar;
+              return (
+                <div key={assignee.userId} className="relative">
+                  {avatar ? (
+                    <img
+                      src={avatar}
+                      alt={getMemberName(assignee)}
+                      className="w-6 h-6 rounded-full object-cover border-2 border-white cursor-pointer hover:scale-110 transition-transform"
+                    />
+                  ) : (
+                    <div
+                      className={`w-6 h-6 ${getAvatarColor(
+                        index
+                      )} rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white cursor-pointer hover:scale-110 transition-transform`}
+                    >
+                      {getInitials(assignee)}
+                    </div>
+                  )}
 
-                <div className="hidden group-hover/avatar:block absolute bottom-full right-0 mb-2 bg-gray-900 text-white text-xs py-1 px-2 rounded whitespace-nowrap z-20">
-                  {getMemberName(assignee)}
+                  <div className="hidden group-hover/avatar:block absolute bottom-full right-0 mb-2 bg-gray-900 text-white text-xs py-1 px-2 rounded whitespace-nowrap z-20">
+                    {getMemberName(assignee)}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

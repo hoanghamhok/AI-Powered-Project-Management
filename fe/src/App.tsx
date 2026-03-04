@@ -11,6 +11,7 @@ import { AdminLayout } from "./features/admin/layouts/AdminLayout";
 import { AdminDashboard } from "./features/admin/pages/AdminDashboard";
 import { UserManagement } from "./features/admin/pages/UserManagement";
 import ProtectedAdminRoute from "./features/auth/components/ProtectedAdminRoute";
+import { ProfilePage } from "./features/auth/pages/ProfilePage";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/auth/google/callback" element={<GoogleCallback />} />
         <Route element={<DashboardLayout />}>
           <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
 
         <Route element={<ProtectedAdminRoute />}>
