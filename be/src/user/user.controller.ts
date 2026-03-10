@@ -1,5 +1,5 @@
 import { Controller, Get, Param, UseGuards, Request, Patch, Body, UseInterceptors, UploadedFile, Post } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags,ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './user.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ImageUploadInterceptor } from '../cloudinary/image-upload.interceptor';

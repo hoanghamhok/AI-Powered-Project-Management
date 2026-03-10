@@ -78,8 +78,8 @@ export function useDnd({ columns, byColumn, move }: UseDnDParams) {
 
     try {
       await move(taskId, targetColumnId, beforeTaskId, afterTaskId);
-    } catch (err) {
-      console.error("Fail to move task", err);
+    } catch (err:any) {
+      console.error("Fail to move task", err.response?.data || err);
     }
   };
 }

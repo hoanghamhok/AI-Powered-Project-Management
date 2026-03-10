@@ -9,7 +9,7 @@ import { ActivityLogService } from "src/activity-log/activity-log.service";
 
 export class TasksService{
     constructor(private prisma:PrismaService,
-                private activitylogservice:ActivityLogService){}
+                private activityLogService:ActivityLogService){}
     
     async getTaskByID(id:string){
         const task = await this.prisma.task.findUnique({where:{id}})
@@ -41,22 +41,22 @@ export class TasksService{
         const nextPosition = last ? last.position + 1000 : 1000;
 
         return this.prisma.task.create({
-            data: {
-            title: createTaskDto.title,
-            description: createTaskDto.description,
-            position: nextPosition,
-            projectId: createTaskDto.projectId,
-            columnId: createTaskDto.columnId,
-            dueDate: createTaskDto.dueDate ? new Date(createTaskDto.dueDate) : null,
-            assignees: {
-            create: createTaskDto.assigneeIds.map(userId => ({
-                user: {
-                connect: { id: userId },
+                data: {
+                title: createTaskDto.title,
+                description: createTaskDto.description,
+                position: nextPosition,
+                projectId: createTaskDto.projectId,
+                columnId: createTaskDto.columnId,
+                dueDate: createTaskDto.dueDate ? new Date(createTaskDto.dueDate) : null,
+                assignees: {
+                create: createTaskDto.assigneeIds.map(userId => ({
+                    user: {
+                    connect: { id: userId },
+                    },
+                })),
                 },
-            })),
             },
-        },
-});
+        });
     }
     
     async update(id: string, dto: UpdateTaskDto) {
@@ -128,227 +128,234 @@ export class TasksService{
             },
         });
     }
-    //note:di chuyển task vào cột DONE->set close:true->set completedAt=Date
-    async moveTask(taskId: string,columnId: string,beforeTaskId?: string,afterTaskId?: string,) {
+    // //note:di chuyển task vào cột DONE->set close:true->set completedAt=Date
+    // async moveTask(taskId: string,columnId: string,beforeTaskId?: string,afterTaskId?: string,) {
+    //     const GAP = 1000;
+
+    //     await this.getTaskByID(taskId);
+
+    //     // Check if the target column is marked as done
+    //     const targetColumn = await this.prisma.column.findUnique({
+    //         where: { id: columnId },
+    //     });
+
+    //     let newPosition: number;
+
+    //     if (beforeTaskId && afterTaskId) {
+    //         const beforeTask = await this.prisma.task.findUnique({
+    //         where: { id: beforeTaskId },
+    //         });
+
+    //         const afterTask = await this.prisma.task.findUnique({
+    //         where: { id: afterTaskId },
+    //         });
+
+    //         if (!beforeTask || !afterTask) {
+    //         throw new Error('Before or After task not found');
+    //         }
+
+    //         newPosition = (beforeTask.position + afterTask.position) / 2;
+    //     }
+
+    //     else if (beforeTaskId) {
+    //         const beforeTask = await this.prisma.task.findUnique({
+    //         where: { id: beforeTaskId },
+    //         });
+
+    //         if (!beforeTask) {
+    //         throw new Error('Before task not found');
+    //         }
+
+    //         // Find the task before beforeTask to calculate position between them
+    //         const prevTask = await this.prisma.task.findFirst({
+    //         where: {
+    //             columnId,
+    //             position: { lt: beforeTask.position }
+    //         },
+    //         orderBy: { position: 'desc' },
+    //         });
+
+    //         if (prevTask) {
+    //         // Position between prevTask and beforeTask
+    //         newPosition = (prevTask.position + beforeTask.position) / 2;
+    //         } else {
+    //         // No task before, so add at the beginning
+    //         newPosition = beforeTask.position - GAP;
+    //         }
+    //     }
+
+    //     else if (afterTaskId) {
+    //         const afterTask = await this.prisma.task.findUnique({
+    //         where: { id: afterTaskId },
+    //         });
+
+    //         if (!afterTask) {
+    //         throw new Error('After task not found');
+    //         }
+
+    //         // Find the next task after afterTask to calculate position between them
+    //         const nextTask = await this.prisma.task.findFirst({
+    //         where: {
+    //             columnId,
+    //             position: { gt: afterTask.position }
+    //         },
+    //         orderBy: { position: 'asc' },
+    //         });
+
+    //         if (nextTask) {
+    //         // Position between afterTask and nextTask
+    //         newPosition = (afterTask.position + nextTask.position) / 2;
+    //         } else {
+    //         // No task after, so add at the end
+    //         newPosition = afterTask.position + GAP;
+    //         }
+    //     }
+
+    //     else {
+    //         const lastTask = await this.prisma.task.findFirst({
+    //         where: { columnId },
+    //         orderBy: { position: 'desc' },
+    //         });
+
+    //         newPosition = lastTask
+    //         ? lastTask.position + GAP
+    //         : GAP;
+    //     }
+
+        
+
+    //     return this.prisma.task.update({
+    //         where: { id: taskId },
+    //         data: {
+    //         columnId,
+    //         position: newPosition,
+    //         updated_at: new Date(),
+    //         completedAt: targetColumn?.closed ? new Date() : null,
+    //         },
+    //     });
+    // }
+    async moveTask(taskId: string,columnId: string,userId: string,beforeTaskId?: string,afterTaskId?: string) {
+
+        console.log({taskId,columnId,userId,beforeTaskId,afterTaskId}); 
+
         const GAP = 1000;
 
-        await this.getTaskByID(taskId);
+        return this.prisma.$transaction(async (tx) => {
 
-        // Check if the target column is marked as done
-        const targetColumn = await this.prisma.column.findUnique({
-            where: { id: columnId },
-        });
-
-        let newPosition: number;
-
-        if (beforeTaskId && afterTaskId) {
-            const beforeTask = await this.prisma.task.findUnique({
-            where: { id: beforeTaskId },
+            const task = await tx.task.findUnique({
+            where: { id: taskId },
             });
 
-            const afterTask = await this.prisma.task.findUnique({
-            where: { id: afterTaskId },
+            if (!task) {
+            throw new Error("Task not found");
+            }
+
+            const targetColumn = await tx.column.findUnique({
+            where: { id: columnId },
+            });
+
+            let newPosition: number;
+
+            if (beforeTaskId && afterTaskId) {
+            const beforeTask = await tx.task.findUnique({
+                where: { id: beforeTaskId },
+            });
+
+            const afterTask = await tx.task.findUnique({
+                where: { id: afterTaskId },
             });
 
             if (!beforeTask || !afterTask) {
-            throw new Error('Before or After task not found');
+                throw new Error("Before or After task not found");
             }
 
             newPosition = (beforeTask.position + afterTask.position) / 2;
-        }
+            }
 
-        else if (beforeTaskId) {
-            const beforeTask = await this.prisma.task.findUnique({
-            where: { id: beforeTaskId },
+            else if (beforeTaskId) {
+            const beforeTask = await tx.task.findUnique({
+                where: { id: beforeTaskId },
             });
 
             if (!beforeTask) {
-            throw new Error('Before task not found');
+                throw new Error("Before task not found");
             }
 
-            // Find the task before beforeTask to calculate position between them
-            const prevTask = await this.prisma.task.findFirst({
-            where: {
+            const prevTask = await tx.task.findFirst({
+                where: {
                 columnId,
-                position: { lt: beforeTask.position }
-            },
-            orderBy: { position: 'desc' },
+                position: { lt: beforeTask.position },
+                },
+                orderBy: { position: "desc" },
             });
 
-            if (prevTask) {
-            // Position between prevTask and beforeTask
-            newPosition = (prevTask.position + beforeTask.position) / 2;
-            } else {
-            // No task before, so add at the beginning
-            newPosition = beforeTask.position - GAP;
+            newPosition = prevTask
+                ? (prevTask.position + beforeTask.position) / 2
+                : beforeTask.position - GAP;
             }
-        }
 
-        else if (afterTaskId) {
-            const afterTask = await this.prisma.task.findUnique({
-            where: { id: afterTaskId },
+            else if (afterTaskId) {
+            const afterTask = await tx.task.findUnique({
+                where: { id: afterTaskId },
             });
 
             if (!afterTask) {
-            throw new Error('After task not found');
+                throw new Error("After task not found");
             }
 
-            // Find the next task after afterTask to calculate position between them
-            const nextTask = await this.prisma.task.findFirst({
-            where: {
+            const nextTask = await tx.task.findFirst({
+                where: {
                 columnId,
-                position: { gt: afterTask.position }
-            },
-            orderBy: { position: 'asc' },
+                position: { gt: afterTask.position },
+                },
+                orderBy: { position: "asc" },
             });
 
-            if (nextTask) {
-            // Position between afterTask and nextTask
-            newPosition = (afterTask.position + nextTask.position) / 2;
-            } else {
-            // No task after, so add at the end
-            newPosition = afterTask.position + GAP;
+            newPosition = nextTask
+                ? (afterTask.position + nextTask.position) / 2
+                : afterTask.position + GAP;
             }
-        }
 
-        else {
-            const lastTask = await this.prisma.task.findFirst({
-            where: { columnId },
-            orderBy: { position: 'desc' },
+            else {
+            const lastTask = await tx.task.findFirst({
+                where: { columnId },
+                orderBy: { position: "desc" },
             });
 
-            newPosition = lastTask
-            ? lastTask.position + GAP
-            : GAP;
-        }
+            newPosition = lastTask ? lastTask.position + GAP : GAP;
+            }
 
-        return this.prisma.task.update({
+            const updated = await tx.task.update({
             where: { id: taskId },
             data: {
-            columnId,
-            position: newPosition,
-            updated_at: new Date(),
-            completedAt: targetColumn?.closed ? new Date() : null,
+                columnId,
+                position: newPosition,
+                updated_at: new Date(),
+                completedAt: targetColumn?.closed ? new Date() : null,
             },
+            });
+
+            // Activity log
+            await this.activityLogService.log({
+                userId,
+                projectId: task.projectId,
+                entityType: "TASK",
+                entityId: taskId,
+                action: "TASK_MOVED",
+                metadata: {
+                    fromColumn: task.columnId,
+                    toColumn: columnId,
+                    oldPosition: task.position,
+                    newPosition,
+                    movedAcrossColumn: task.columnId !== columnId,
+                    beforeTaskId,
+                    afterTaskId,
+                },
+            });
+
+            return updated;
         });
     }
-//     async moveTask(
-//   taskId: string,
-//   columnId: string,
-//   userId: string,
-//   beforeTaskId?: string,
-//   afterTaskId?: string,
-// ) {
-//   const GAP = 1000;
-
-//   return this.prisma.$transaction(async (tx) => {
-
-//     const task = await tx.task.findUnique({
-//       where: { id: taskId },
-//     });
-
-//     if (!task) {
-//       throw new Error("Task not found");
-//     }
-
-//     const targetColumn = await tx.column.findUnique({
-//       where: { id: columnId },
-//     });
-
-//     let newPosition: number;
-
-//     if (beforeTaskId && afterTaskId) {
-//       const beforeTask = await tx.task.findUnique({
-//         where: { id: beforeTaskId },
-//       });
-
-//       const afterTask = await tx.task.findUnique({
-//         where: { id: afterTaskId },
-//       });
-
-//       if (!beforeTask || !afterTask) {
-//         throw new Error("Before or After task not found");
-//       }
-
-//       newPosition = (beforeTask.position + afterTask.position) / 2;
-//     }
-
-//     else if (beforeTaskId) {
-//       const beforeTask = await tx.task.findUnique({
-//         where: { id: beforeTaskId },
-//       });
-
-//       if (!beforeTask) throw new Error("Before task not found");
-
-//       const prevTask = await tx.task.findFirst({
-//         where: {
-//           columnId,
-//           position: { lt: beforeTask.position },
-//         },
-//         orderBy: { position: "desc" },
-//       });
-
-//       newPosition = prevTask
-//         ? (prevTask.position + beforeTask.position) / 2
-//         : beforeTask.position - GAP;
-//     }
-
-//     else if (afterTaskId) {
-//       const afterTask = await tx.task.findUnique({
-//         where: { id: afterTaskId },
-//       });
-
-//       if (!afterTask) throw new Error("After task not found");
-
-//       const nextTask = await tx.task.findFirst({
-//         where: {
-//           columnId,
-//           position: { gt: afterTask.position },
-//         },
-//         orderBy: { position: "asc" },
-//       });
-
-//       newPosition = nextTask
-//         ? (afterTask.position + nextTask.position) / 2
-//         : afterTask.position + GAP;
-//     }
-
-//     else {
-//       const lastTask = await tx.task.findFirst({
-//         where: { columnId },
-//         orderBy: { position: "desc" },
-//       });
-
-//       newPosition = lastTask ? lastTask.position + GAP : GAP;
-//     }
-
-//     const updated = await tx.task.update({
-//       where: { id: taskId },
-//       data: {
-//         columnId,
-//         position: newPosition,
-//         updated_at: new Date(),
-//         completedAt: targetColumn?.closed ? new Date() : null,
-//       },
-//     });
-
-//     await this.activitylogservice.log({
-//       userId,
-//       projectId: task.projectId,
-//       entityType: "TASK",
-//       entityId: taskId,
-//       action: "TASK_MOVED",
-//       metadata: {
-//         fromColumn: task.columnId,
-//         toColumn: columnId,
-//         oldPosition: task.position,
-//         newPosition,
-//       },
-//     });
-
-//     return updated;
-//   });
-// }
 
     async getTasksByUserId(userId: string) {
         return this.prisma.task.findMany({

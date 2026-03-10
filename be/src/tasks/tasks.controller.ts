@@ -1,5 +1,6 @@
-import {Controller,Get,Patch,Post,Delete,Request,Body, Param} from '@nestjs/common';
-import {ApiTags} from '@nestjs/swagger';
+import {Controller,Get,Patch,Post,Delete,Request,Body, Param,UseGuards} from '@nestjs/common';
+import {ApiTags, ApiBearerAuth} from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -26,8 +27,10 @@ export class TasksController{
     }
 
     @Patch(':id/move')
-    moveTask(@Param('id') id: string,@Body() dto: MoveTaskDto,) {
-    return this.tasksService.moveTask(id,dto.columnId,dto.beforeTaskId,dto.afterTaskId,);
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    moveTask(@Param('id') id: string,@Body() dto: MoveTaskDto,@Request() req) {
+        return this.tasksService.moveTask(id,dto.columnId,req.user.userId,dto.beforeTaskId,dto.afterTaskId,);
     }
 
     @Delete(':id')

@@ -1,24 +1,23 @@
-import { useEffect,useContext } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../contexts/authContext";
-
+import { useAuth } from "../hooks/useAuth";
 
 export default function GoogleCallback() {
   const navigate = useNavigate();
-  const auth = useContext(AuthContext);
+  const loginWithToken = useAuth((state) => state.loginWithToken);
 
   useEffect(() => {
     const token = new URLSearchParams(window.location.search).get('token');
 
-    if (!token || !auth) {
+    if (!token) {
       navigate('/');
       return;
     }
 
-    auth.loginWithToken(token).then(() => {
+    loginWithToken(token).then(() => {
       navigate('/');
     });
-  }, []);
+  }, [loginWithToken, navigate]);
 
   return <p>Signing in with Google...</p>;
 }

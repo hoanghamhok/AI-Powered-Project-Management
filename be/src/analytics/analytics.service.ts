@@ -1,18 +1,18 @@
-// 4️⃣ Project Stats Service
+// Project Stats Service
 
-// Bạn nên có service chuyên tính:
+//service chuyên tính:
 
-// Total tasks
+// Total tasks-- count task
 
-// Completed
+// Completed-columnid DONE
 
-// Overdue
+// Overdue--dueDate<dateNow
 
-// Completion rate
+// Completion rate--?????
 
-// Avg completion time
+// Avg completion time--???????
 
-// Tasks per member
+// Tasks per member--count
 
 // Không query thẳng DB từ controller.
 

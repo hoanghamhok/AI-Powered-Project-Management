@@ -3,32 +3,57 @@ import { Injectable } from "@nestjs/common";
 @Injectable()
 export class FeatureService {
 
-  extractFeatures(task, logs, comments, timeLogs, assignees) {
+  extractFeatures(
+    task: any,
+    activityLogs: any[],
+    comments: any[],
+    timeLogs: any[],
+    assignees: any[]
+  ) {
 
-    const daysToDeadline =
-      task.dueDate
-        ? (task.dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-        : null;
+    const now = Date.now();
 
-    const deadlineProximity =
-      daysToDeadline === null
-        ? 0
-        : daysToDeadline < 2
-        ? 1
-        : daysToDeadline < 5
-        ? 0.6
-        : 0.2;
+    let deadlineProximity = 0;
 
-    const moveCount =
-      logs.filter(l => l.action === "TASK_MOVED").length;
+    if (task.dueDate) {
+      const due = new Date(task.dueDate).getTime();
+      const created = new Date(task.createdAt).getTime();
 
-    const reassignCount =
-      logs.filter(l => l.action === "TASK_REASSIGNED").length;
+      const totalDuration = due - created;
+      const elapsed = now - created;
+
+      if (totalDuration > 0) {
+        deadlineProximity = Math.min(elapsed / totalDuration, 1);
+      }
+
+      console.log(due,created,totalDuration,elapsed)
+    }
+
+    const moveCount = activityLogs.filter(
+      log => log.action === "TASK_MOVED"
+    ).length;
+
+    const reassignCount = activityLogs.filter(
+      log => log.action === "TASK_ASSIGNED"
+    ).length;
 
     const commentCount = comments.length;
 
-    const totalHours =
-      timeLogs.reduce((sum, l) => sum + l.hours, 0);
+    const totalHours = timeLogs.reduce((sum, log) => {
+      return sum + (log.hours || 0);
+    }, 0);
+
+    const crossColumnMoves = activityLogs.filter(
+      log =>
+        log.action === "TASK_MOVED" &&
+        log.metadata?.movedAcrossColumn === true
+    ).length;
+
+    const taskAgeDays =
+      (now - new Date(task.createdAt).getTime()) /
+      (1000 * 60 * 60 * 24);
+
+    const assigneeCount = assignees.length;
 
     return {
       deadlineProximity,
@@ -36,7 +61,9 @@ export class FeatureService {
       reassignCount,
       commentCount,
       totalHours,
-      assigneeCount: assignees.length
+      crossColumnMoves,
+      taskAgeDays,
+      assigneeCount
     };
   }
 }
