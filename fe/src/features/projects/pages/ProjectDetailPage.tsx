@@ -15,6 +15,7 @@ import { useDnd } from "../../tasks/hooks/useDnd";
 import { LeaveProject } from "../components/LeaveProject";
 import type { Task } from "../../tasks/types";
 import { TaskDetailModal } from "../../tasks/components/TaskDetailModal";
+import { Plus, X, Columns } from "lucide-react";
 
 export default function ProjectDetailPage() {
   const [isAdding, setIsAdding] = useState(false);
@@ -34,7 +35,11 @@ export default function ProjectDetailPage() {
   const { user } = useAuth();
 
   if (!projectId) {
-    return <div className="p-6">Invalid project</div>;
+    return (
+      <div className="flex items-center justify-center h-screen text-gray-500">
+        Invalid project
+      </div>
+    );
   }
 
   const { move } = useTask(projectId);
@@ -45,8 +50,7 @@ export default function ProjectDetailPage() {
     isError: projectError,
   } = useProjectDetails(projectId);
 
-  const { data: membersRes, refetch: refetchMembers } =
-    useProjectMembers(projectId);
+  const { data: membersRes, refetch: refetchMembers } = useProjectMembers(projectId);
 
   const {
     columns,
@@ -66,11 +70,23 @@ export default function ProjectDetailPage() {
   } = useTask(projectId);
 
   if (projectLoading || columnLoading || taskLoading) {
-    return <div className="p-6">Loading project...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen gap-3 text-gray-500">
+        <svg className="w-5 h-5 animate-spin text-violet-500" viewBox="0 0 24 24" fill="none">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
+        </svg>
+        <span className="text-sm font-medium">Loading project…</span>
+      </div>
+    );
   }
 
   if (projectError || !projectRes) {
-    return <div className="p-6 text-red-500">Project not found</div>;
+    return (
+      <div className="flex items-center justify-center h-screen text-red-500 text-sm">
+        Project not found
+      </div>
+    );
   }
 
   const project = projectRes.data;
@@ -93,23 +109,24 @@ export default function ProjectDetailPage() {
     }
   };
 
-  const handleDragEnd = useDnd({
-    columns,
-    byColumn,
-    move,
-  });
+  const handleDragEnd = useDnd({ columns, byColumn, move });
+
+  const handleAddColumn = () => {
+    if (!columnTitle.trim()) return;
+    addColumn(columnTitle.trim());
+    setColumnTitle("");
+    setIsAdding(false);
+  };
 
   return (
     <DragContextProvider onDragEnd={handleDragEnd}>
-      {/* Modals */}
+      {/* ── Modals ───────────────────────────────────────────────── */}
       <ConfirmDeleteModal
         isOpen={deleteConfirmOpen}
-        title={
-          deleteTarget?.type === "column" ? "Delete Column" : "Delete Task"
-        }
+        title={deleteTarget?.type === "column" ? "Delete Column" : "Delete Task"}
         message={
           deleteTarget?.type === "column"
-            ? `Are you sure you want to delete the column "${deleteTarget?.name}" and all its tasks?`
+            ? `Are you sure you want to delete "${deleteTarget?.name}" and all its tasks?`
             : `Are you sure you want to delete the task "${deleteTarget?.name}"?`
         }
         confirmText="Delete"
@@ -129,16 +146,16 @@ export default function ProjectDetailPage() {
         onSuccess={() => refetchMembers()}
       />
 
-      {/* Header */}
-      <header className="px-4 sm:px-6 py-4 bg-white border-b flex flex-col sm:flex-row sm:items-center gap-3">
+      {/* ── Header ───────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-10 px-4 sm:px-6 py-4 bg-white/80 backdrop-blur-sm border-b border-gray-200 flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl font-semibold truncate">{project.name}</h1>
-          <p className="text-gray-500 text-sm truncate">
-            {project.description}
-          </p>
+          <h1 className="text-xl font-bold text-gray-900 truncate">{project.name}</h1>
+          {project.description && (
+            <p className="text-gray-500 text-sm truncate mt-0.5">{project.description}</p>
+          )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <MembersAvatar
             projectId={projectId}
             isAdmin={isAdmin}
@@ -149,31 +166,24 @@ export default function ProjectDetailPage() {
         </div>
       </header>
 
-      {/* Error */}
+      {/* ── Error banner ─────────────────────────────────────────── */}
       {errorMessage && (
-        <div className="px-6 py-3 bg-red-50 border-b border-red-200 flex justify-between items-center">
-          <span className="text-red-700 text-sm">{errorMessage}</span>
+        <div className="px-6 py-2.5 bg-red-50 border-b border-red-200 flex justify-between items-center">
+          <span className="text-red-700 text-sm flex items-center gap-2">
+            <span>⚠️</span> {errorMessage}
+          </span>
           <button
             onClick={() => setErrorMessage(null)}
-            className="text-red-500 hover:text-red-700 text-lg"
+            className="p-1 text-red-400 hover:text-red-600 hover:bg-red-100 rounded transition"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
-      {/* ===== BOARD GRID ===== */}
-      <main className="flex-1 overflow-y-auto">
-        <div
-          className="
-            p-4
-            grid
-            grid-cols-1
-            md:grid-cols-2
-            xl:grid-cols-[repeat(auto-fit,minmax(280px,1fr))]
-            gap-4
-          "
-        >
+      {/* ── Board ────────────────────────────────────────────────── */}
+      <main className="flex-1 overflow-x-auto overflow-y-auto">
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4 min-h-full">
           {columns.map((column) => (
             <div key={column.id} className="w-full">
               <ColumnCard
@@ -201,62 +211,67 @@ export default function ProjectDetailPage() {
             </div>
           ))}
 
-          {/* Add column */}
+          {/* ── Add Column ─────────────────────────────────────── */}
           <div className="w-full">
             {isAdding ? (
-              <div className="bg-gray-100 p-3 rounded-lg space-y-2">
-                <input
-                  autoFocus
-                  value={columnTitle}
-                  onChange={(e) => setColumnTitle(e.target.value)}
-                  placeholder="Column title"
-                  className="w-full px-2 py-1 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && columnTitle.trim()) {
-                      addColumn(columnTitle.trim());
-                      setColumnTitle("");
-                      setIsAdding(false);
-                    }
-                    if (e.key === "Escape") {
-                      setIsAdding(false);
-                      setColumnTitle("");
-                    }
-                  }}
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      if (!columnTitle.trim()) return;
-                      addColumn(columnTitle.trim());
-                      setColumnTitle("");
-                      setIsAdding(false);
+              <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                <div className="h-1 bg-gradient-to-r from-violet-400 to-sky-400" />
+                <div className="p-4 space-y-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                    New Column
+                  </p>
+                  <input
+                    autoFocus
+                    value={columnTitle}
+                    onChange={(e) => setColumnTitle(e.target.value)}
+                    placeholder="Column title…"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition placeholder-gray-400"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleAddColumn();
+                      if (e.key === "Escape") {
+                        setIsAdding(false);
+                        setColumnTitle("");
+                      }
                     }}
-                    className="px-3 py-1 bg-blue-500 text-white rounded"
-                  >
-                    Add
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsAdding(false);
-                      setColumnTitle("");
-                    }}
-                    className="px-3 py-1 text-gray-500"
-                  >
-                    Cancel
-                  </button>
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleAddColumn}
+                      disabled={!columnTitle.trim()}
+                      className={`flex-1 py-2 text-sm font-semibold rounded-lg transition ${
+                        columnTitle.trim()
+                          ? "bg-violet-600 hover:bg-violet-700 text-white shadow-sm shadow-violet-200"
+                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      }`}
+                    >
+                      Add Column
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsAdding(false);
+                        setColumnTitle("");
+                      }}
+                      className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : (
               <button
                 onClick={() => setIsAdding(true)}
-                className="w-full h-12 border-2 border-dashed rounded-lg text-gray-500 hover:bg-gray-100"
+                className="group w-full h-14 flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-2xl text-gray-400 hover:text-violet-600 hover:border-violet-300 hover:bg-violet-50/50 transition-all text-sm font-medium"
               >
-                + Add column
+                <Plus className="w-4 h-4 transition-transform group-hover:scale-110" />
+                Add column
               </button>
             )}
           </div>
         </div>
       </main>
+
+      {/* ── Task Detail Modal ─────────────────────────────────────── */}
       {selectedTask && (
         <TaskDetailModal
           task={selectedTask}

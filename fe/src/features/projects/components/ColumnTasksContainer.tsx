@@ -37,7 +37,7 @@ export function ColumnTasksContainer({
   addTask,
   onEditTask,
   onDeleteTask,
-  onOpenTaskDetail
+  onOpenTaskDetail,
 }: ColumnTasksContainerProps) {
   const { setNodeRef } = useDroppable({ id: columnId });
 
@@ -47,17 +47,61 @@ export function ColumnTasksContainer({
   const [newTaskDueDate, setNewTaskDueDate] = useState("");
   const [newTaskAssignees, setNewTaskAssignees] = useState<string[]>([]);
 
+  const avatarColors = [
+    "bg-violet-500",
+    "bg-sky-500",
+    "bg-emerald-500",
+    "bg-rose-500",
+    "bg-amber-500",
+    "bg-fuchsia-500",
+    "bg-cyan-500",
+    "bg-orange-500",
+  ];
+
+  const getAvatarColor = (id: string) =>
+    avatarColors[id.charCodeAt(0) % avatarColors.length];
+
+  const getInitials = (name: string) =>
+    name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) ?? "?";
+
+  const inputCls =
+    "w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition placeholder-gray-400 resize-none";
+
+  const canAdd = !!newTaskTitle.trim() && newTaskAssignees.length > 0;
+
+  const handleAdd = () => {
+    if (!canAdd) return;
+    addTask(
+      columnId,
+      newTaskTitle.trim(),
+      projectId,
+      newTaskDescription,
+      newTaskAssignees,
+      newTaskDueDate || undefined
+    );
+    setIsAddingTask(false);
+    setNewTaskTitle("");
+    setNewTaskDescription("");
+    setNewTaskDueDate("");
+    setNewTaskAssignees([]);
+  };
+
   return (
     <div
       ref={setNodeRef}
       data-columnid={columnId}
-      className="space-y-2 mb-2 min-h-32 rounded-lg border-2 border-dashed p-1"
+      className="space-y-2 min-h-32 rounded-xl border-2 border-dashed border-gray-200 p-1.5 transition-colors"
     >
       <SortableContext
-        items={tasks.map(t => t.id)}
+        items={tasks.map((t) => t.id)}
         strategy={verticalListSortingStrategy}
       >
-        {tasks.map(task =>
+        {tasks.map((task) =>
           editingTaskId === task.id ? (
             renderEditForm(task)
           ) : (
@@ -67,97 +111,130 @@ export function ColumnTasksContainer({
               assignees={assignees}
               onEdit={() => onEditTask(task.id)}
               onDelete={() => onDeleteTask(task.id, task.title)}
-               onOpenDetail={onOpenTaskDetail}
+              onOpenDetail={onOpenTaskDetail}
             />
           )
         )}
       </SortableContext>
 
-      {/* ADD TASK */}
-      <div className="mt-3">
+      {/* ── Add Task ────────────────────────────────────────────── */}
+      <div className="mt-1">
         {isAddingTask ? (
-          <div className="bg-white p-2 rounded shadow space-y-2">
-            <input
-              autoFocus
-              value={newTaskTitle}
-              onChange={e => setNewTaskTitle(e.target.value)}
-              placeholder="Task title"
-              className="w-full border px-2 py-1 text-sm"
-            />
+          <div className="relative bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            {/* Accent bar */}
+            <div className="h-1 w-full bg-gradient-to-r from-sky-400 to-violet-500" />
 
-            <textarea
-              value={newTaskDescription}
-              onChange={e => setNewTaskDescription(e.target.value)}
-              placeholder="Description"
-              className="w-full border px-2 py-1 text-sm"
-            />
+            <div className="p-4 space-y-3">
+              {/* Header label */}
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                ＋ New Task
+              </p>
 
-            <input
-              type="datetime-local"
-              value={newTaskDueDate}
-              onChange={e => setNewTaskDueDate(e.target.value)}
-              className="w-full border px-2 py-1 text-sm"
-            />
+              {/* Title */}
+              <input
+                autoFocus
+                value={newTaskTitle}
+                onChange={(e) => setNewTaskTitle(e.target.value)}
+                placeholder="Task title…"
+                className={inputCls}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleAdd();
+                  if (e.key === "Escape") setIsAddingTask(false);
+                }}
+              />
 
-            <div className="flex gap-2 flex-wrap">
-              {assignees.map(m => (
+              {/* Description */}
+              <textarea
+                rows={2}
+                value={newTaskDescription}
+                onChange={(e) => setNewTaskDescription(e.target.value)}
+                placeholder="Add a description (optional)…"
+                className={inputCls}
+              />
+
+              {/* Due date */}
+              <div className="relative">
+                <label className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 block mb-1">
+                  Due date
+                </label>
+                <input
+                  type="datetime-local"
+                  value={newTaskDueDate}
+                  onChange={(e) => setNewTaskDueDate(e.target.value)}
+                  className={inputCls}
+                />
+              </div>
+
+              {/* Assignees */}
+              {assignees.length > 0 && (
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-2">
+                    Assignees
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {assignees.map((m: any) => {
+                      const selected = newTaskAssignees.includes(m.userId);
+                      return (
+                        <button
+                          key={m.userId}
+                          type="button"
+                          onClick={() =>
+                            setNewTaskAssignees((prev) =>
+                              prev.includes(m.userId)
+                                ? prev.filter((id) => id !== m.userId)
+                                : [...prev, m.userId]
+                            )
+                          }
+                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                            selected
+                              ? "bg-sky-500 text-white border-sky-500 shadow-sm shadow-sky-200"
+                              : "bg-gray-50 text-gray-600 border-gray-200 hover:border-sky-300 hover:text-sky-600"
+                          }`}
+                        >
+                          <span
+                            className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white ${getAvatarColor(m.userId)}`}
+                          >
+                            {getInitials(m.user?.username ?? "")}
+                          </span>
+                          {m.user?.username}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex items-center gap-2 pt-1">
                 <button
-                  key={m.userId}
-                  onClick={() =>
-                    setNewTaskAssignees(prev =>
-                      prev.includes(m.userId)
-                        ? prev.filter(id => id !== m.userId)
-                        : [...prev, m.userId]
-                    )
-                  }
-                  className={`px-2 py-1 text-xs rounded ${
-                    newTaskAssignees.includes(m.userId)
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200"
+                  disabled={!canAdd}
+                  onClick={handleAdd}
+                  className={`flex-1 py-2 text-sm font-semibold rounded-lg transition shadow-sm ${
+                    canAdd
+                      ? "bg-sky-500 hover:bg-sky-600 text-white shadow-sky-200"
+                      : "bg-gray-100 text-gray-400 cursor-not-allowed"
                   }`}
                 >
-                  {m.user?.username}
+                  Add task
                 </button>
-              ))}
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                disabled={!newTaskTitle || !newTaskAssignees.length}
-                onClick={() => {
-                  addTask(
-                    columnId,
-                    newTaskTitle,
-                    projectId,
-                    newTaskDescription,
-                    newTaskAssignees,
-                    newTaskDueDate || undefined
-                  );
-                  setIsAddingTask(false);
-                  setNewTaskTitle("");
-                  setNewTaskDescription("");
-                  setNewTaskDueDate("");
-                  setNewTaskAssignees([]);
-                }}
-                className="bg-blue-500 text-white px-3 py-1 text-xs rounded"
-              >
-                Add
-              </button>
-
-              <button
-                onClick={() => setIsAddingTask(false)}
-                className="text-xs text-gray-500"
-              >
-                Cancel
-              </button>
+                <button
+                  onClick={() => setIsAddingTask(false)}
+                  className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         ) : (
           <button
             onClick={() => setIsAddingTask(true)}
-            className="w-full py-2 text-sm text-gray-600 hover:bg-gray-200 rounded"
+            className="w-full flex items-center justify-center gap-1.5 py-2 text-sm text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-all border border-transparent hover:border-sky-200 font-medium"
           >
-            + Add Task
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Add task
           </button>
         )}
       </div>
