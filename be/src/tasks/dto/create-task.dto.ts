@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {IsOptional,IsString,IsArray, ArrayNotEmpty,Min, IsISO8601} from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsNumber } from 'class-validator';
 
 export class CreateTaskDto {
   @ApiProperty()
@@ -30,11 +32,13 @@ export class CreateTaskDto {
   @IsISO8601()
   dueDate?: string;
 
-  @ApiProperty()
   @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
   estimateHours?: number;
 
-  @ApiProperty()
   @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
   difficulty?: number;
 }

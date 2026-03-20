@@ -12,7 +12,7 @@ interface ColumnCardProps {
   markColumnAsDone: (id: string) => Promise<void>;
   editColumn: (id: string, title: string) => void;
   deleteColumn: (id: string, name: string) => void;
-  addTask: (columnId: string, title: string, projectId: string, description: string, assigneeIds: string[], dueDate?: string) => Promise<void>;
+  addTask: (columnId: string, title: string, projectId: string, description: string, assigneeIds: string[], dueDate?: string,estimateHours?:number,difficulty?:number) => Promise<void>;
   editTask: (id: string, data: any) => void;
   deleteTask: (id: string, title: string) => void;
   onOpenTaskDetail: (task: Task) => void;
@@ -275,7 +275,6 @@ export function ColumnCard({
         </div>
       )}
 
-      {/* ── Tasks ───────────────────────────────────────────────── */}
       <ColumnTasksContainer
         columnId={column.id}
         projectId={projectId}

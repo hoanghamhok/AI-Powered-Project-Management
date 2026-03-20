@@ -2,7 +2,7 @@ import api from "../../api/client"
 
 export const fetchColumnsByProject = (id:string) => api.get(`/columns/project/${id}`)
 export const createColumn = (data: { title: string;projectId:string }) =>
-  api.post("/columns", data);
+  api.post("/columns/project", data);
 export const updateColumn = (id: string, data: { title?: string }) =>
   api.patch(`/columns/${id}`, data);
 export const deleteColumn = (id: string) =>

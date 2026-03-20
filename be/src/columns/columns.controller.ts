@@ -19,7 +19,7 @@ export class ColumnsController {
     return this.columnsService.getByProject(projectId);
   }
 
-  @Post("project/:projectId")
+  @Post("project/")
   create(@Body() dto: CreateColumnDto) {
     return this.columnsService.create(dto);
   }

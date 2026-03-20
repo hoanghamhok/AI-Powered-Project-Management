@@ -30,9 +30,11 @@ export function useTask(projectId: string) {
     description: string,
     assigneeIds: string[],
     dueDate: string,
+    estimateHours?: number,
     difficulty?: number,
-    estimateHours?: number
   ) => {
+    // console.log("difficulty:", difficulty);
+    // console.log("estimateHours:", estimateHours);
     return addMutation.mutateAsync({
       title,
       description,
@@ -40,8 +42,8 @@ export function useTask(projectId: string) {
       projectId,
       assigneeIds,
       dueDate,
-      difficulty:difficulty ?? 0,
       estimateHours: estimateHours ?? 0,
+      difficulty:difficulty ?? 0,
     });
   };
 

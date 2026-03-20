@@ -19,6 +19,8 @@ export function TaskDetailModal({ task, onClose }: TaskDetailModalProps) {
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, [onClose]);
+  console.log("Difficult:",task.difficulty)
+  console.log("Es:",task.estimateHours)
 
   return (
     <div
@@ -58,7 +60,7 @@ export function TaskDetailModal({ task, onClose }: TaskDetailModalProps) {
               </p>
             </section>
           )}
-          <CommentSection taskId={task.id} />
+          <CommentSection taskId={task.id} />        
         </div>
 
         

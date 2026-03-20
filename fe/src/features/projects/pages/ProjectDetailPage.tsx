@@ -199,8 +199,8 @@ export default function ProjectDetailPage() {
                   setDeleteTarget({ type: "column", id, name });
                   setDeleteConfirmOpen(true);
                 }}
-                addTask={async (columnId, title, projectId, description, assigneeIds, dueDate) => {
-                  await addTask(columnId, title, projectId, description, assigneeIds, dueDate ?? "");
+                addTask={async (columnId, title, projectId, description, assigneeIds, dueDate,estimateHours,difficulty) => {
+                  await addTask(columnId, title, projectId, description, assigneeIds, dueDate ?? "",estimateHours,difficulty);
                 }}
                 editTask={editTask}
                 deleteTask={(id, title) => {

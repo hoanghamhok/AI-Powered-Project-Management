@@ -16,10 +16,12 @@ export class TasksService{
         if(!task){
             throw new NotFoundException();
         }
+
         return task;
     }
     
     async create(createTaskDto:CreateTaskDto){
+        
         const project = await this.prisma.project.findUnique({ where: { id: createTaskDto.projectId } });
         if (!project) {
             throw new NotFoundException('Project not found');
@@ -37,9 +39,7 @@ export class TasksService{
             orderBy: { position: 'desc' },
             select: { position: true },
         });
-
         const nextPosition = last ? last.position + 1000 : 1000;
-
         return this.prisma.task.create({
             data: {
                 title: createTaskDto.title,
@@ -66,6 +66,7 @@ export class TasksService{
                 },
             }
         });
+        
     }
     
     async update(id: string, dto: UpdateTaskDto) {

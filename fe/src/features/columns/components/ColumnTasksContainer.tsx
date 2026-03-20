@@ -79,31 +79,32 @@ export function ColumnTasksContainer({
   const canAdd = !!newTaskTitle.trim() && newTaskAssignees.length > 0;
 
   const handleAdd = async () => {
-  if (!canAdd) return;
-  const estimate =
-    newTaskEstimateHours === "" ? undefined : Number(newTaskEstimateHours);
+    if (!canAdd) return;
+    const estimate =
+      newTaskEstimateHours === "" ? undefined : Number(newTaskEstimateHours);
 
-  const difficulty = Number(newTaskDifficulty);
+    const difficulty = Number(newTaskDifficulty);
 
-  await addTask(
-    columnId,
-    newTaskTitle.trim(),
-    projectId,
-    newTaskDescription,
-    newTaskAssignees,
-    newTaskDueDate || undefined,
-    difficulty,
-    estimate
-  );
+    await addTask(
+      columnId,
+      newTaskTitle.trim(),
+      projectId,
+      newTaskDescription,
+      newTaskAssignees,
+      newTaskDueDate || undefined,
+      estimate,
+      difficulty  
+    );
 
-  setIsAddingTask(false);
-  setNewTaskTitle("");
-  setNewTaskDescription("");
-  setNewTaskDueDate("");
-  setNewTaskAssignees([]);
-  setNewTaskEstimateHours("");
-  setNewTaskDifficulty(3);
-}; 
+    setIsAddingTask(false);
+    setNewTaskTitle("");
+    setNewTaskDescription("");
+    setNewTaskDueDate("");
+    setNewTaskAssignees([]);
+    setNewTaskEstimateHours("");
+    setNewTaskDifficulty(3);
+  }; 
+
   return (
     <div
       ref={setNodeRef}
