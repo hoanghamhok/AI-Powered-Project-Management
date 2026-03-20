@@ -177,7 +177,7 @@ export default function ProjectDetailPage() {
             className="p-1 text-red-400 hover:text-red-600 hover:bg-red-100 rounded transition"
           >
             <X className="w-4 h-4" />
-          </button>
+          </button> 
         </div>
       )}
 
@@ -185,7 +185,7 @@ export default function ProjectDetailPage() {
       <main className="flex-1 overflow-x-auto overflow-y-auto">
         <div className="p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4 min-h-full">
           {columns.map((column) => (
-            <div key={column.id} className="w-full">
+            <div key={column.id} className="w-full">  
               <ColumnCard
                 column={column}
                 tasks={byColumn[column.id] ?? []}

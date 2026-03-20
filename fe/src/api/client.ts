@@ -1,4 +1,5 @@
   import axios from "axios";
+  import { useAuth } from "../features/auth/hooks/useAuth";
 
   const API_BASE =
     import.meta.env.MODE === "development"
@@ -29,7 +30,7 @@
     (response) => response,
     (error) => {
       if (error.response?.status === 401) {
-        localStorage.removeItem('token');
+        useAuth.getState().logout();
         window.location.href = '/';
       }
       return Promise.reject(error);

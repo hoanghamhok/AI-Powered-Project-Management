@@ -39,11 +39,11 @@ export class AuthService {
         if (!isPasswordValid) {
             throw new UnauthorizedException('Invalid credentials');
         }
-        
         const publicUser = await this.usersService.getUserById(user.id);
         const accessToken = await this.jwtService.signAsync({ 
             sub: user.id, 
             role: user.role 
+            //expriesIn:15m
         });
         
         return { user: publicUser, accessToken };
