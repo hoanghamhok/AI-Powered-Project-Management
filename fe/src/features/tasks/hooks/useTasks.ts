@@ -18,7 +18,6 @@ export function useTask(projectId: string) {
     mutationFn: createTask,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks", projectId] });
-      // Also invalidate all upcoming tasks queries
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
   });
@@ -33,8 +32,6 @@ export function useTask(projectId: string) {
     estimateHours?: number,
     difficulty?: number,
   ) => {
-    // console.log("difficulty:", difficulty);
-    // console.log("estimateHours:", estimateHours);
     return addMutation.mutateAsync({
       title,
       description,
