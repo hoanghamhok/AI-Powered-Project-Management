@@ -1,12 +1,14 @@
-import { Controller,Get,Param } from "@nestjs/common";
-import { RiskService } from "./risk.service";
-
-@Controller("ai")
+import { Controller, Post, Body } from '@nestjs/common';
+import { AiService } from './ai.service';
+import { AskDto } from './dto/ask.dto';
+import { HttpCode } from '@nestjs/common';
+@Controller('ai')
 export class AiController {
-  constructor(private readonly riskService: RiskService) {}
+  constructor(private ai: AiService) {}
 
-  @Get("tasks/:taskId/risk")
-  async getTaskRisk(@Param("taskId") taskId: string) {
-    return this.riskService.calculateTaskRisk(taskId);
+  @Post('ask')
+  @HttpCode(200)
+  async ask(@Body() body: AskDto) {
+    return this.ai.ask(body.question, body.projectId);
   }
 }

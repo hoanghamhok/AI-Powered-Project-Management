@@ -114,6 +114,7 @@ model Task {
   assignees   TaskAssignee[]
   comments    Comment[]
   taskTimeLogs TaskTimeLog[]
+  taskvector   TaskVector?
   created_at  DateTime       @default(now())
   updated_at  DateTime       @updatedAt
   completedAt DateTime?
@@ -226,4 +227,15 @@ model TaskTimeLog {
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id])
+}
+
+model TaskVector {
+  id        String   @id @default(cuid())
+  taskId    String   @unique
+  content   String
+  embedding Float[]
+
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
 }

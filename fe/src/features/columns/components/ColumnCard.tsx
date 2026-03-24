@@ -41,9 +41,7 @@ export function ColumnCard({
   const [editingTaskAssignees, setEditingTaskAssignees] = useState<string[]>([]);
   const { data: membersRes, isLoading } = useProjectMembers(projectId);
 
-  const members = Array.isArray(membersRes)
-    ? membersRes
-    : membersRes?.data || [];
+  const members = Array.isArray(membersRes)  ? membersRes : membersRes?.data || [];
   const getInitials = (name: string) =>
     name
       ?.split(" ")
@@ -83,7 +81,6 @@ export function ColumnCard({
 
     return (
       <div className="relative bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-        {/* Accent bar */}
         <div
           className={`h-1 w-full ${isEdit ? "bg-gradient-to-r from-violet-500 to-fuchsia-500" : "bg-gradient-to-r from-sky-400 to-violet-500"}`}
         />
@@ -94,7 +91,6 @@ export function ColumnCard({
             {isEdit ? "✏️ Edit Task" : "＋ New Task"}
           </p>
 
-          {/* Title */}
           <input
             autoFocus
             placeholder="Task title…"

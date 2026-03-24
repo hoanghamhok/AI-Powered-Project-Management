@@ -16,6 +16,7 @@ import { LeaveProject } from "../components/LeaveProject";
 import type { Task } from "../../tasks/types";
 import { TaskDetailModal } from "../../tasks/components/TaskDetailModal";
 import { Plus, X, Columns } from "lucide-react";
+import ChatBox from "../../ai/components/Chatbot";
 
 export default function ProjectDetailPage() {
   const [isAdding, setIsAdding] = useState(false);
@@ -120,7 +121,7 @@ export default function ProjectDetailPage() {
 
   return (
     <DragContextProvider onDragEnd={handleDragEnd}>
-      {/* ── Modals ───────────────────────────────────────────────── */}
+      {/* ── Modals ── */}
       <ConfirmDeleteModal
         isOpen={deleteConfirmOpen}
         title={deleteTarget?.type === "column" ? "Delete Column" : "Delete Task"}
@@ -146,7 +147,7 @@ export default function ProjectDetailPage() {
         onSuccess={() => refetchMembers()}
       />
 
-      {/* ── Header ───────────────────────────────────────────────── */}
+      {/* ── Header ──*/}
       <header className="sticky top-0 z-10 px-4 sm:px-6 py-4 bg-white/80 backdrop-blur-sm border-b border-gray-200 flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="flex-1 min-w-0">
           <h1 className="text-xl font-bold text-gray-900 truncate">{project.name}</h1>
@@ -166,7 +167,7 @@ export default function ProjectDetailPage() {
         </div>
       </header>
 
-      {/* ── Error banner ─────────────────────────────────────────── */}
+      {/* ── Error banner ── */}
       {errorMessage && (
         <div className="px-6 py-2.5 bg-red-50 border-b border-red-200 flex justify-between items-center">
           <span className="text-red-700 text-sm flex items-center gap-2">
@@ -181,7 +182,7 @@ export default function ProjectDetailPage() {
         </div>
       )}
 
-      {/* ── Board ────────────────────────────────────────────────── */}
+      {/* ── Board ── */}
       <main className="flex-1 overflow-x-auto overflow-y-auto">
         <div className="p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4 min-h-full">
           {columns.map((column) => (
@@ -211,7 +212,7 @@ export default function ProjectDetailPage() {
             </div>
           ))}
 
-          {/* ── Add Column ─────────────────────────────────────── */}
+          {/* ── Add Column ── */}
           <div className="w-full">
             {isAdding ? (
               <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
@@ -270,7 +271,7 @@ export default function ProjectDetailPage() {
           </div>
         </div>
       </main>
-
+      <ChatBox projectId={projectId}/>      
       {/* ── Task Detail Modal ─────────────────────────────────────── */}
       {selectedTask && (
         <TaskDetailModal
@@ -279,5 +280,6 @@ export default function ProjectDetailPage() {
         />
       )}
     </DragContextProvider>
+    
   );
 }

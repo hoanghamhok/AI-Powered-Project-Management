@@ -47,7 +47,7 @@ export const useAuth = create<AuthState>((set, get) => ({
       });
 
       localStorage.setItem('token', res.accessToken);
-    } catch (err) {
+    } catch (err) { 
       set({ loading: false });
       throw err; 
     }

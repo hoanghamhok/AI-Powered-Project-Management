@@ -9,7 +9,7 @@ import { ActivityLogService } from "src/activity-log/activity-log.service";
 
 export class TasksService{
     constructor(private prisma:PrismaService,
-                private activityLogService:ActivityLogService){}
+                private activityLogService:ActivityLogService,){}
     
     async getTaskByID(id:string){
         const task = await this.prisma.task.findUnique({where:{id}})

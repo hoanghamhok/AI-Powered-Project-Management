@@ -30,7 +30,7 @@ export function TaskCard({
   onOpenDetail,
 }: TaskCardProps) {
   const {
-    attributes,
+    attributes,   
     listeners,
     setNodeRef,
     transform,
