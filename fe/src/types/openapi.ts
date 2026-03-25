@@ -557,6 +557,22 @@ export interface paths {
         };
         get: operations["ColumnsController_getByProject"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/columns/project": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
         post: operations["ColumnsController_create"];
         delete?: never;
         options?: never;
@@ -644,16 +660,16 @@ export interface paths {
         patch: operations["CommentsController_updateComment"];
         trace?: never;
     };
-    "/ai/tasks/{taskId}/risk": {
+    "/ai/ask": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["AiController_getTaskRisk"];
+        get?: never;
         put?: never;
-        post?: never;
+        post: operations["AiController_ask"];
         delete?: never;
         options?: never;
         head?: never;
@@ -721,8 +737,6 @@ export interface components {
             columnId: string;
             assigneeIds: string[];
             dueDate: string;
-            estimateHours: number;
-            difficulty: number;
         };
         UpdateTaskDto: {
             title?: string;
@@ -770,6 +784,10 @@ export interface components {
             mentions?: string[];
         };
         UpdateCommentDto: Record<string, never>;
+        AskDto: {
+            question: string;
+            projectId: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -1735,16 +1753,18 @@ export interface operations {
             };
         };
     };
-    AiController_getTaskRisk: {
+    AiController_ask: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                taskId: string;
-            };
+            path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AskDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {

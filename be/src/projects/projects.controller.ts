@@ -38,13 +38,6 @@ export class ProjectsController {
         return this.projectsService.createProject(data);
     }
 
-    // @UseGuards(JwtAuthGuard)
-    // @ApiBearerAuth()
-    // @Get('details/:projectId')
-    // async getProjectDetails(@Param('projectId') projectId: string) {
-    //     return this.projectsService.getProjectDetails(projectId);
-    // }
-
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
     @Patch(':id/update')
@@ -54,8 +47,8 @@ export class ProjectsController {
 
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
-    @Delete('/:id')
+    @Delete('/:projectId')
     async deleteProject(@Param('projectId') projectId: string, @Request() req) {
-        return this.projectsService.deleteProject(projectId, req.user.userId);
+    return this.projectsService.deleteProject(projectId, req.user.userId);
     }
 }

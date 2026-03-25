@@ -148,22 +148,56 @@ export default function ProjectDetailPage() {
       />
 
       {/* ── Header ──*/}
-      <header className="sticky top-0 z-10 px-4 sm:px-6 py-4 bg-white/80 backdrop-blur-sm border-b border-gray-200 flex flex-col sm:flex-row sm:items-center gap-3">
-        <div className="flex-1 min-w-0">
-          <h1 className="text-xl font-bold text-gray-900 truncate">{project.name}</h1>
-          {project.description && (
-            <p className="text-gray-500 text-sm truncate mt-0.5">{project.description}</p>
-          )}
+      <header className="sticky top-0 z-10 
+        mx-3 mt-3 px-6 py-4 
+        bg-white border border-gray-200 
+        rounded-2xl 
+        flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+        {/* LEFT */}
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 flex items-center justify-center 
+            rounded-xl bg-violet-100 text-violet-600 font-bold text-sm shadow-sm">
+            {project.name?.charAt(0).toUpperCase()}
+          </div>
+
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-semibold text-gray-900 truncate">
+                {project.name}
+              </h1>
+
+              {isAdmin && (
+                <span className="text-[11px] px-2 py-0.5 rounded-md 
+                  bg-violet-100 text-violet-700 font-medium">
+                  Admin
+                </span>
+              )}
+            </div>
+
+            {project.description && (
+              <p className="text-gray-500 text-sm truncate mt-0.5">
+                {project.description}
+              </p>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
-          <MembersAvatar
-            projectId={projectId}
-            isAdmin={isAdmin}
-            canSetOwner={canSetOwner}
-            onInviteClick={() => setIsInviteModalOpen(true)}
-          />
-          <LeaveProject projectId={projectId} />
+        {/* RIGHT */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 
+            bg-gray-50 border border-gray-200 rounded-xl">
+            <MembersAvatar
+              projectId={projectId}
+              isAdmin={isAdmin}
+              canSetOwner={canSetOwner}
+              onInviteClick={() => setIsInviteModalOpen(true)}
+            />
+          </div>
+
+          <div className="px-2 py-1 rounded-lg hover:bg-red-50 transition">
+            <LeaveProject projectId={projectId} />
+          </div>
         </div>
       </header>
 

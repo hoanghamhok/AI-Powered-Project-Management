@@ -13,6 +13,7 @@
     []:callback được gọi một lân khi component được mount
     [dep]:callback được gọi lại mỗi khi dependency thay đổi
     0/:callback được gọi mỗi khi component rerender,luôn được gọi sau khi component thêm element vào DOM.
+        .mount:component được tạo ra và render lần đầu tiên vào DOM(khi xuất hiện trên giao diện lần đầu)
 
 #thứ tự viết SQL:select from join where groupby having orderby
         thực hiện:from where grby having select orderby
@@ -21,4 +22,15 @@
 
 #useContext:cho phép component truy cập và sử dụng dữ liệu được chia sẻ mà không cần truyền props qua nhiều cấp component
 
-#
+*refactor
+    ProjectDetailPage (fetch global)
+    ↓
+    BoardContainer (logic nhẹ)
+    ↓
+    ColumnContainer (fetch + handle column)
+    ↓
+    TaskList (UI + add task)
+    ↓
+    TaskCard (pure UI)
+
+#setNoderef:dùng để gắn DOM element vào hệ thống drag and drop,cho biết element nào đang được kéo thả
