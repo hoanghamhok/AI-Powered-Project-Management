@@ -49,7 +49,7 @@ export class TasksService{
                 columnId: createTaskDto.columnId,
                 estimateHours:createTaskDto.estimateHours,
                 difficulty:createTaskDto.difficulty,
-                dueDate: createTaskDto.dueDate ? new Date(createTaskDto.dueDate) : null,
+                dueDate:createTaskDto.dueDate ? new Date(createTaskDto.dueDate): null,
                 assignees: {
                 create: createTaskDto.assigneeIds.map(userId => ({
                     user: {

@@ -10,6 +10,7 @@ interface MembersAvatarProps {
   isAdmin: boolean;
   canSetOwner: boolean;
   onInviteClick: () => void;
+  currentUserId?:string;
 }
 
 export function MembersAvatar({
@@ -17,6 +18,7 @@ export function MembersAvatar({
   isAdmin,
   canSetOwner,
   onInviteClick,
+  currentUserId
 }: MembersAvatarProps) {
   const { data: membersRes, isLoading } = useProjectMembers(projectId);
 
@@ -81,6 +83,8 @@ export function MembersAvatar({
     setSelectedMember(null);
   };
 
+
+
   if (isLoading) {
     return <span className="text-xs text-gray-500">Loading...</span>;
   }
@@ -94,13 +98,14 @@ export function MembersAvatar({
 
           const avatar =
             member.user?.avatarUrl || member.avatarUrl || null;
-
+          const isSelf = member.userId === currentUserId;
           return (
             <div key={member.id} className="relative">
               <div
                 onClick={(e) => {
                   e.stopPropagation();
                   if (!isAdmin) return;
+                  if (isSelf) return;
 
                   setSelectedMember(member);
 
@@ -126,8 +131,8 @@ export function MembersAvatar({
               </div>
 
               {/* menu */}
-              {isAdmin && menuMemberId === member.id && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-44 bg-white border rounded-md shadow-lg text-xs z-[999]">
+              {isAdmin && menuMemberId === member.id && !isSelf && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-44 bg-white border rounded-md shadow-lg text-xs z-30">
                   {member.role !== "ADMIN" && member.role !== "OWNER" && (
                     <button
                       onClick={() => {

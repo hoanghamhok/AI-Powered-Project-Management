@@ -30,13 +30,15 @@ export class CreateTaskDto {
   @ApiProperty()
   @IsOptional()
   @IsISO8601()
-  dueDate?: string;
+  dueDate: string;
 
+  @ApiProperty()
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   estimateHours?: number;
 
+  @ApiProperty()
   @IsOptional()
   @Type(() => Number)
   @IsNumber()

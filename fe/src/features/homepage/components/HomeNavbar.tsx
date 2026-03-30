@@ -5,6 +5,7 @@ import { useNotifications } from "../../notifications/hooks/useNotifications";
 import { DeleteNotification } from "../../notifications/components/DeleteNotification";
 import { useInvite } from "../../invitations/hooks/useInvite";
 import { useNavigate } from "react-router-dom";
+import { InviteModal } from "../../invitations/components/InviteModal";
 
 const HomeNavbar = () => {
   const { user, logout } = useAuth();
@@ -29,6 +30,7 @@ const HomeNavbar = () => {
     const handleClickOutside = (e: MouseEvent) => {
       if (notiRef.current && !notiRef.current.contains(e.target as Node)) {
         setShowNoti(false);
+        setInviteToken(null);
       }
       if (userRef.current && !userRef.current.contains(e.target as Node)) {
         setShowUserMenu(false);
@@ -46,7 +48,7 @@ const HomeNavbar = () => {
   };
 
   return (
-    <header className="w-full h-16 sticky top-0 z-40 flex justify-between items-center px-10 bg-[#f7f9fb]">
+    <header className="w-full h-16 sticky top-0 z-20 flex justify-between items-center px-10 bg-[#f7f9fb]">
       {/* Search */}
       <div>
         <input
@@ -60,7 +62,12 @@ const HomeNavbar = () => {
         {/* NOTIFICATIONS */}
         <div className="relative" ref={notiRef}>
           <button
-            onClick={() => setShowNoti((v) => !v)}
+            onClick={() => {
+              setShowNoti((v) => !v);
+              if (showNoti) {
+                setInviteToken(null);
+              }
+            }}
             className="p-2 rounded-full hover:bg-white/50 relative"
           >
             🔔
@@ -100,8 +107,23 @@ const HomeNavbar = () => {
                 ))
               )}
             </div>
+            
           )}
         </div>
+
+        {/* INVITE MODAL */}
+        <InviteModal
+            isLoading={acceptMutation.isPending || rejectMutation.isPending}
+            error={
+              (acceptMutation.error as any)?.message ||
+              (rejectMutation.error as any)?.message
+            }
+            open={!!inviteToken}
+            inviteToken={inviteToken ?? ""}
+            onClose={() => setInviteToken(null)}
+            onAccept={handleAccept}
+            onReject={(token) => rejectMutation.mutate(token)}
+        />
 
         <div className="h-8 w-[1px] bg-slate-200" />
 

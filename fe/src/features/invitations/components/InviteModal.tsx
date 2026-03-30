@@ -1,4 +1,5 @@
 import { UserPlus, X, Mail } from "lucide-react";
+import { createPortal } from "react-dom";
 
 interface InviteModalProps {
   open: boolean;
@@ -21,9 +22,9 @@ export function InviteModal({
 }: InviteModalProps) {
   if (!open || !inviteToken) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+      className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
@@ -98,6 +99,7 @@ export function InviteModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

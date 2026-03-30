@@ -68,7 +68,7 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'login' }: Props) => {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 flex items-center justify-center z-50"
+          className="fixed inset-0 flex items-center justify-center z-40"
           style={{ backdropFilter: 'blur(6px)', backgroundColor: 'rgba(15,15,30,0.5)' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

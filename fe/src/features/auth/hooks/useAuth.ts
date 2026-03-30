@@ -3,6 +3,7 @@ import { authApi } from '../auth.api';
 import { userApi } from '../user.api';
 import type { LoginRequest, RegisterRequest } from '../type';
 import type { User } from '../type';
+import { useNavigate } from 'react-router-dom';
 
 type AuthState = {
   user: User | null;
@@ -21,7 +22,7 @@ export const useAuth = create<AuthState>((set, get) => ({
   user: null,
   token: localStorage.getItem('token'),
   loading: false,
-
+  
   fetchProfile: async () => {
     try {
       const { data } = await authApi.getProfile();
@@ -90,6 +91,7 @@ export const useAuth = create<AuthState>((set, get) => ({
   logout: () => {
     set({ user: null, token: null });
     localStorage.removeItem('token');
+    window.location.href = "/";
   },
 
   updateAvatar: async (file: File) => {

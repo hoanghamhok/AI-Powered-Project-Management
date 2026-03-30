@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { Trash2Icon } from "lucide-react";
 import { RemoveProject } from "./DeleteProject";
 
 type ProjectMemberItem = {
@@ -12,7 +11,6 @@ type ProjectMemberItem = {
     id: string;
     name: string;
     description: string;
-    // Thêm các field này nếu có trong data
     progress?: number; // 0-100
     status?: "HEALTHY" | "AT_RISK" | "DELAYED";
     members?: Array<{
@@ -87,7 +85,7 @@ export function ProjectCard({ item }: ProjectCardProps) {
         <div className="flex items-center justify-between">
           {/* Member avatars */}
           <div className="flex -space-x-2">
-            {members.slice(0, 3).map((member, index) => (
+            {members.slice(0, 3).map((member) => (
               <div
                 key={member.id}
                 className="w-7 h-7 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 overflow-hidden"

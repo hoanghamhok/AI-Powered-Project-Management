@@ -1,10 +1,11 @@
 export function useProjectRole(
-  members: { userId: string; role: "OWNER" | "ADMIN" | "MEMBER" }[],
+  members: { userId: string; role: "OWNER" | "ADMIN" | "MEMBER" }[] = [],
   user?: { id: string; role: "USER" | "SUPER_ADMIN" }
 ) {
   if (!user) {
     return {
       isAdmin: false,
+      isOwner: false,
       canSetOwner: false,
       isSuperAdmin: false,
     };
@@ -13,21 +14,19 @@ export function useProjectRole(
   if (user.role === "SUPER_ADMIN") {
     return {
       isAdmin: true,
-      canSetOwner: true, 
+      isOwner: true,
+      canSetOwner: true,
       isSuperAdmin: true,
     };
   }
 
-  const member = members.find(m => m.userId === user.id);
-
-  const isOwner = member?.role === "OWNER";
+  const member = members?.find(m => m.userId === user.id);
+  const role = member?.role;
 
   return {
-    isAdmin:
-      member?.role === "ADMIN" ||
-      member?.role === "OWNER",
-    isOwner: isOwner,
-    canSetOwner: isOwner, 
+    isAdmin: role === "ADMIN" || role === "OWNER",
+    isOwner: role === "OWNER",
+    canSetOwner: role === "OWNER",
     isSuperAdmin: false,
   };
 }

@@ -48,7 +48,7 @@ export function ConfirmModal({
   }, [onCancel, loading]);
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-40 animate-in fade-in duration-200">
       <div
         ref={modalRef}
         className="bg-white rounded-2xl p-6 w-[320px] shadow-2xl animate-in zoom-in-95 duration-200"

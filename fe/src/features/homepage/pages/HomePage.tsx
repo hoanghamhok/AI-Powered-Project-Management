@@ -11,7 +11,7 @@ const HomePage = () => {
   const { user } = useAuth();
   const { data: projects, isLoading, isError } = useProjectsByUser();
   
-  // Giới hạn hiển thị 3 projects
+  //hiển thị 3prj
   const displayedProjects = projects?.slice(0, 3) || [];
   const hasMoreProjects = (projects?.length || 0) > 3;
 

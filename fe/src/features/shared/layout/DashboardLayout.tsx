@@ -30,7 +30,7 @@ export default function DashboardLayout() {
         {/* SIDEBAR */}
         <div
           className={`
-            fixed lg:static z-50
+            fixed lg:static z-30
             h-full w-64
             transform transition-transform duration-300
             bg-white dark:bg-slate-800 border-r dark:border-slate-700

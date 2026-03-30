@@ -24,7 +24,7 @@ export function TaskDetailModal({ task, onClose }: TaskDetailModalProps) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center"
+      className="fixed inset-0 bg-black/40 z-40 flex items-center justify-center"
       onClick={onClose}
     >
       <div

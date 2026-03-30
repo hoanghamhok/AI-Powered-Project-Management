@@ -159,7 +159,7 @@ export function TaskCard({
                     </div>
                   )}
 
-                  <div className="hidden group-hover/avatar:block absolute bottom-full right-0 mb-2 bg-gray-900 text-white text-xs py-1 px-2 rounded whitespace-nowrap z-20">
+                  <div className="hidden group-hover/avatar:block absolute bottom-full right-0 mb-2 bg-gray-900 text-white text-xs py-1 px-2 rounded whitespace-nowrap z-30">
                     {getMemberName(assignee)}
                   </div>
                 </div>

@@ -17,7 +17,7 @@ interface ColumnTasksContainerProps {
     projectId: string,
     description: string,
     assigneeIds: string[],
-    dueDate?: string,
+    dueDate: string,
     difficulty?: number,
     estimatehours?: number
   ) => Promise<void>;
@@ -88,7 +88,7 @@ export function ColumnTasksContainer({
       projectId,
       newTaskDescription,
       newTaskAssignees,
-      newTaskDueDate || undefined,
+      newTaskDueDate,
       estimate,
       difficulty  
     );

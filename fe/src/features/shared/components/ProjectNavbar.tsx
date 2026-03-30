@@ -67,7 +67,7 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
 
   return (
     <>
-      <header className="w-full sticky top-0 flex justify-between items-center px-10 py-4 bg-[#f7f9fb] dark:bg-slate-900 z-50">
+      <header className="w-full sticky top-0 z-40 flex justify-between items-center px-10 py-4 bg-[#f7f9fb] dark:bg-slate-900 ">
 
         {/* LEFT */}
         <div className="flex items-center space-x-8 flex-grow">
@@ -117,7 +117,7 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
             </button>
 
             {showNoti && (
-              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-800 rounded-xl shadow-lg overflow-hidden">
+              <div className="absolute right-0 mt-2 w-80 z-30 bg-white dark:bg-slate-800 rounded-xl shadow-lg overflow-hidden">
 
                 {notifications.length === 0 ? (
                   <div className="p-4 text-sm text-slate-500 text-center">

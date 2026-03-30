@@ -217,7 +217,7 @@ export function DashboardSidebar({ activities = [], events = [] }: DashboardSide
             <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full"></div>
             <div className="absolute -right-4 top-8 w-24 h-24 bg-white/10 rounded-full"></div>
             
-            <div className="relative z-10">
+            <div className="relative">
               <h3 className="text-2xl font-bold mb-2">Architect Pro</h3>
               <p className="text-indigo-100 text-sm mb-6">
                 Unlock advanced analytics and team collaboration tools.

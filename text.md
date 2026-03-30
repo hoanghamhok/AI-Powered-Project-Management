@@ -34,3 +34,47 @@
     TaskCard (pure UI)
 
 #setNoderef:dùng để gắn DOM element vào hệ thống drag and drop,cho biết element nào đang được kéo thả
+
+#Redux   User click "+"
+            ↓
+    dispatch({ type: "INCREASE" })
+            ↓
+    Reducer:
+    count + 1
+            ↓
+    Store:
+    count = 1
+            ↓
+    UI:
+    hiển thị "1"
+
+#React.memo:chỉ so sánh props bằng references
+    bình thường component cha re-render => con re render
+    memo => props ko đổi thì reuse 0 re render
+    . truyền function inline => mỗi lần render tạo function mới => react.memo không tác dụng
+
+#UseCallback:giữ lại references của function.=>react.memo so sánh props
+            sử dụng without react memo khi dùng cho dependency của useEffect
+
+#dumb component:KHÔNG gọi api,bussiness logic(mapping api,xử lí data lớn),state phức tạp(form lớn,workflow),biết về backend structure
+                CÓ     render data,state nhỏ (open/close,toogle edit),gọi callback từ props
+
+#side effect:hành động tác động ra phạm vi ngoài thân hàm component,làm thay đổi một cái j đó không lq đến tính toán UI
+            gọi API,DOM thủ công,event listener,consolelog để debug,
+            react re render thường xuyên => để trong thân hàm sẽ chạy mỗi khi component render => sinh ra useEffect
+
+#trước ProjectDetailPage                    :                  
+  └── ColumnCard                                                    
+        └── ColumnTasksContainer
+              ├── fetch data
+              ├── handle logic
+              ├── render list
+              ├── form add task
+
+#sau    useProjectDetailPage  (logic + data)
+                ↓
+        ProjectDetailPage     (compose UI)
+                ↓
+        ColumnCard            (UI)
+        ├── TaskList       (render list + dnd)
+        └── AddTaskForm    (form riêng)

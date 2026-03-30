@@ -66,7 +66,7 @@ export function InviteMemberModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+      className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
       <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">

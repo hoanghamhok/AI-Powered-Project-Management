@@ -24,7 +24,7 @@ const HomeSidebar = () => {
   const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
   
   return (
-    <aside className="h-screen w-64 fixed left-0 top-0 z-50 bg-[#f2f4f6] flex flex-col py-8 px-6">
+    <aside className="h-screen w-64 fixed left-0 top-0 z-10 bg-[#f2f4f6] flex flex-col py-8 px-6">
       {/* Logo */}
       <div className="mb-8 px-2">
         <div className="flex items-center gap-2 mb-1">

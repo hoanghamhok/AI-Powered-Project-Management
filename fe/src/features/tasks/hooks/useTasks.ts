@@ -22,7 +22,7 @@ export function useTask(projectId: string) {
     },
   });
 
-  const add = (
+  const add = async (
     columnId: string,
     title: string,
     projectId: string,
@@ -30,9 +30,9 @@ export function useTask(projectId: string) {
     assigneeIds: string[],
     dueDate: string,
     estimateHours?: number,
-    difficulty?: number,
-  ) => {
-    return addMutation.mutateAsync({
+    difficulty?: number
+  ): Promise<void> => {
+    await addMutation.mutateAsync({
       title,
       description,
       columnId,
@@ -40,7 +40,7 @@ export function useTask(projectId: string) {
       assigneeIds,
       dueDate,
       estimateHours: estimateHours ?? 0,
-      difficulty:difficulty ?? 0,
+      difficulty: difficulty ?? 0,
     });
   };
 
@@ -49,7 +49,6 @@ export function useTask(projectId: string) {
       updateTask(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks", projectId] });
-      // Also invalidate all upcoming tasks queries
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
   });
@@ -62,7 +61,6 @@ export function useTask(projectId: string) {
     mutationFn: deleteTask,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks", projectId] });
-      // Also invalidate all upcoming tasks queries
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
   });

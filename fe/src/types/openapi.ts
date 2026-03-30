@@ -366,7 +366,7 @@ export interface paths {
         get: operations["ProjectsController_getProjectByID"];
         put?: never;
         post?: never;
-        delete: operations["ProjectsController_deleteProject"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -402,6 +402,22 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["ProjectsController_updateProject"];
+        trace?: never;
+    };
+    "/projects/{projectId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["ProjectsController_deleteProject"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/invites/{projectId}/invite": {
@@ -737,6 +753,8 @@ export interface components {
             columnId: string;
             assigneeIds: string[];
             dueDate: string;
+            estimateHours: number;
+            difficulty: number;
         };
         UpdateTaskDto: {
             title?: string;
@@ -1303,25 +1321,6 @@ export interface operations {
             };
         };
     };
-    ProjectsController_deleteProject: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                projectId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     ProjectsController_createProject: {
         parameters: {
             query?: never;
@@ -1357,6 +1356,25 @@ export interface operations {
                 "application/json": components["schemas"]["UpdateProjectDto"];
             };
         };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProjectsController_deleteProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             200: {
                 headers: {
