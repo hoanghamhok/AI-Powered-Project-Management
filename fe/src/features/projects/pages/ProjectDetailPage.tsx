@@ -123,8 +123,8 @@ export default function ProjectDetailPage() {
         />
 
         {/* Board */}
-        <div className="p-6 overflow-x-auto">
-          <div className="flex gap-4 pb-4 min-h-[calc(100vh-180px)]">
+        <div className="p-4 sm:p-6 overflow-x-auto overflow-y-hidden">
+          <div className="flex gap-4 sm:gap-6 pb-4 items-start min-h-[calc(100vh-180px)]">
             {columns.map((column) => (
               <ColumnCard
                 key={column.id}
@@ -148,9 +148,9 @@ export default function ProjectDetailPage() {
             ))}
 
             {/* Add Column */}
-            <div className="flex-shrink-0">
+            <div className="shrink-0 w-[85vw] sm:w-[320px]">
               {isAdding ? (
-                <div className="bg-white border border-gray-200 rounded-2xl p-4 min-w-[280px] shadow-sm">
+                <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
                   <div className="space-y-3">
                     <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
                       ➕ New Column
@@ -203,7 +203,7 @@ export default function ProjectDetailPage() {
               ) : (
                 <button
                   onClick={() => setIsAdding(true)}
-                  className="flex items-center gap-2 px-4 py-3 min-w-[280px] text-left text-sm font-medium text-gray-600 hover:text-gray-900 bg-white/60 hover:bg-white border-2 border-dashed border-gray-300 hover:border-violet-400 rounded-2xl transition-all group"
+                  className="flex items-center gap-2 px-4 py-3 w-full text-left text-sm font-medium text-gray-600 hover:text-gray-900 bg-white/60 hover:bg-white border-2 border-dashed border-gray-300 hover:border-violet-400 rounded-2xl transition-all group"
                 >
                   <div className="w-6 h-6 flex items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white group-hover:scale-110 transition-transform">
                     <Plus className="w-4 h-5" />

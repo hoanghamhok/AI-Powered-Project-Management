@@ -34,10 +34,10 @@ export function ProjectHeader({
   return (
     <>
       {/* HEADER */}
-      <header className="sticky top-0 z-0 
-        mx-3 mt-3 px-6 py-4 
-        bg-white border border-gray-200 
-        rounded-2xl 
+      <header className="sticky top-0 z-10 
+        mx-3 mt-3 px-4 sm:px-6 py-4 
+        bg-white/80 backdrop-blur-md border border-gray-200 
+        rounded-2xl shadow-sm
         flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
         {/* LEFT */}

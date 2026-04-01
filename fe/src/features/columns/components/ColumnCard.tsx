@@ -272,7 +272,7 @@ export function ColumnCard({
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-200 rounded-2xl p-4 flex flex-col gap-3 min-w-[320px] max-w-[320px] shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-200 rounded-2xl p-4 flex flex-col gap-3 w-[85vw] sm:w-[320px] shrink-0 shadow-sm hover:shadow-md transition-shadow">
       {/* ── Column Header ───────────────────────────────────────── */}
       {editingColumn ? (
         <div className="space-y-2 mb-1">

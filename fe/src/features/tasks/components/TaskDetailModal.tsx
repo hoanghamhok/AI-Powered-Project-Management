@@ -5,7 +5,7 @@ import { CommentSection } from "../../comment/components/CommentSection";
 
 // Icons
 import { TfiAlignLeft } from "react-icons/tfi";
-import { MdEdit, MdOutlineDateRange } from "react-icons/md";
+import { MdOutlineDateRange } from "react-icons/md";
 import { IoMdTime } from "react-icons/io";
 import { Gauge, X } from "lucide-react";
 
@@ -110,7 +110,7 @@ export function TaskDetailModal({ task, onClose }: TaskDetailModalProps) {
         </button>
 
         {/* Main Content - Left */}
-        <div className="flex-1 p-6 md:p-12 lg:p-16 space-y-12">
+        <div className="flex-1 p-6 md:p-12 lg:p-16 space-y-12 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
           
           {/* Header Section */}
           <div className="space-y-6">
