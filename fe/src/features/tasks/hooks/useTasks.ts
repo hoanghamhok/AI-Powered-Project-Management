@@ -10,7 +10,9 @@ export function useTask(projectId: string) {
     enabled: !!projectId,
     queryFn: async () => {
       const res = await fetchTasksByProjectID(projectId);
+            console.log(res);
       return res.data;
+
     },
   });
 

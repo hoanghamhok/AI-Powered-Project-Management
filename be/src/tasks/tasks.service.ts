@@ -347,6 +347,8 @@ export class TasksService{
             created_at: task.created_at,
             updated_at: task.updated_at,
             assigneeIds: task.assignees.map(a => a.userId),
+            difficulty:task.difficulty,
+            estimateHours:task.estimateHours
         }));
     }
 }

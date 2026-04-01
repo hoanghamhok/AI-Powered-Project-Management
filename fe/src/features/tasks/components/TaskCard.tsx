@@ -60,7 +60,6 @@ export function TaskCard({
     const username = member.user?.username || "";
     return username ? username[0].toUpperCase() : "?";
   };
-
   const getAvatarColor = (index: number) => {
     const colors = [
       "bg-blue-500",

@@ -39,7 +39,7 @@ export function DashboardSidebar({ tasks: fallbackTasks = [] }: DashboardSidebar
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
+    <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-8 mt-12">
 
       {/* ================= recent act ================= */}
       <div className="bg-white p-6 rounded-xl">
@@ -131,7 +131,7 @@ export function DashboardSidebar({ tasks: fallbackTasks = [] }: DashboardSidebar
         {isLoading && <p>Loading tasks...</p>}
         {error && <p className="text-red-500">Failed to load tasks</p>}
 
-        <div className="space-y-4 mb-6">
+        <div className="space-y-4 mb-6 bg-gray-50 p-4 rounded-xl">
           {upcomingTasks.map((task) => {
             if (!task.dueDate) return null;
 
@@ -157,13 +157,6 @@ export function DashboardSidebar({ tasks: fallbackTasks = [] }: DashboardSidebar
             );
           })}
         </div>
-
-        {/* <Link
-          to="/tasks"
-          className="text-indigo-600 text-sm hover:underline"
-        >
-          View All Tasks
-        </Link> */}
       </div>
     </div>
   );

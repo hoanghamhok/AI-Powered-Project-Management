@@ -1,226 +1,231 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import dayjs from "dayjs";
 import type { Task } from "../types";
 import { CommentSection } from "../../comment/components/CommentSection";
+
+// Icons
+import { TfiAlignLeft } from "react-icons/tfi";
+import { MdEdit, MdOutlineDateRange } from "react-icons/md";
+import { IoMdTime } from "react-icons/io";
+import { Gauge, X } from "lucide-react";
 
 interface TaskDetailModalProps {
   task: Task;
   onClose: () => void;
 }
 
+// Sub-component: Status Badge
+const StatusBadge = ({ columnId }: { columnId: string }) => {
+  const statusMap: Record<string, { bg: string; text: string; label: string }> = {
+    'todo': { bg: 'bg-slate-500/10', text: 'text-slate-600', label: 'To Do' },
+    'in-progress': { bg: 'bg-indigo-500/10', text: 'text-indigo-600', label: 'In Progress' },
+    'done': { bg: 'bg-emerald-500/10', text: 'text-emerald-600', label: 'Done' },
+  };
+  
+  const style = statusMap[columnId] || { bg: 'bg-gray-500/10', text: 'text-gray-600', label: columnId };
+  
+  return (
+    <div className={`inline-flex items-center gap-2 px-4 py-2 ${style.bg} ${style.text} rounded-full border border-current/10 transition-all duration-200 hover:scale-[1.02]`}>
+      <div className={`w-2 h-2 rounded-full ${style.text.replace('text-', 'bg-')} animate-pulse`} />
+      <span className="text-sm font-bold tracking-tight">{style.label}</span>
+    </div>
+  );
+};
+
+// Sub-component: Info Item
+const InfoItem = ({ 
+  icon: Icon, 
+  label, 
+  value, 
+  subValue 
+}: { 
+  icon: any; 
+  label: string; 
+  value: string; 
+  subValue?: string;
+}) => (
+  <div className="group flex items-start gap-4 transition-all duration-200 hover:translate-x-1">
+    <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-white to-slate-50 flex items-center justify-center text-indigo-600 shadow-sm border border-slate-200/70 group-hover:shadow-md group-hover:border-indigo-200 transition-all duration-200">
+      <Icon size={20} />
+    </div>
+    <div className="space-y-1.5">
+      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+        {label}
+      </p>
+      <p className="text-[15px] font-bold text-slate-900 leading-tight">
+        {value}
+      </p>
+      {subValue && (
+        <p className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg w-fit">
+          {subValue}
+        </p>
+      )}
+    </div>
+  </div>
+);
+
 export function TaskDetailModal({ task, onClose }: TaskDetailModalProps) {
-  // ESC close
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Focus trap và ESC handler
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
-
+    
+    // Focus vào modal khi mở
+    modalRef.current?.focus();
+    
+    // Prevent scroll
+    document.body.style.overflow = 'hidden';
+    
     window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
+    return () => {
+      window.removeEventListener("keydown", handleEsc);
+      document.body.style.overflow = 'unset';
+    };
   }, [onClose]);
 
-  // Map status colors
-  const getStatusStyle = (columnId: string) => {
-    const statusMap: Record<string, { bg: string; text: string; label: string }> = {
-      'todo': { bg: 'bg-slate-500/10', text: 'text-slate-600', label: 'To Do' },
-      'in-progress': { bg: 'bg-indigo-500/10', text: 'text-indigo-600', label: 'In Progress' },
-      'done': { bg: 'bg-emerald-500/10', text: 'text-emerald-600', label: 'Done' },
-    };
-    return statusMap[columnId] || { bg: 'bg-gray-500/10', text: 'text-gray-600', label: columnId };
-  };
-
-  const statusStyle = getStatusStyle(task.columnId);
-  console.log(task)
   return (
     <div
-      className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:p-8"
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-200"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="task-title"
     >
       <div
+        ref={modalRef}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white/85 backdrop-blur-2xl w-full max-w-6xl h-full max-h-[90vh] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row border border-white/40"
+        tabIndex={-1}
+        className="bg-white w-full max-w-6xl h-full max-h-[92vh] rounded-3xl md:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row border border-slate-200/60 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300"
       >
-        {/* Close Button (Mobile Floating) */}
+        {/* Close Button - Mobile */}
         <button
           onClick={onClose}
-          className="md:hidden absolute top-4 right-4 z-50 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg"
+          aria-label="Close modal"
+          className="md:hidden absolute top-4 right-4 z-50 w-11 h-11 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-slate-200 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all duration-200 active:scale-95"
         >
-          <span className="text-xl">✕</span>
+          <X size={20} strokeWidth={2.5} />
         </button>
 
-        {/* Main Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-8 md:p-12 space-y-10">
-          {/* Header Actions & Title */}
+        {/* Main Content - Left */}
+        <div className="flex-1 p-6 md:p-12 lg:p-16 space-y-12">
+          
+          {/* Header Section */}
           <div className="space-y-6">
-            <nav className="flex items-center gap-2 text-xs font-semibold tracking-widest text-gray-500 uppercase">
+            {/* Breadcrumb */}
+            <nav 
+              className="flex items-center gap-2 text-[11px] font-bold tracking-[0.2em] text-gray-400 uppercase"
+              aria-label="Breadcrumb"
+            >
               <span>Projects</span>
-              <span>›</span>
+              <span className="text-slate-300">/</span>
               <span className="text-indigo-600">Task-{task.id}</span>
             </nav>
 
-            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
+            {/* Title & Actions */}
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+              <h1 
+                id="task-title"
+                className="text-3xl md:text-4xl lg:text-4xl font-black tracking-tight text-slate-900 leading-[1.1] pr-12 md:pr-0"
+              >
                 {task.title}
               </h1>
 
-              <div className="flex items-center gap-3">
-                <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-gray-900 font-semibold shadow-sm hover:shadow-md transition-all border border-slate-100">
-                  <span className="text-xl">✏️</span>
-                  <span>Edit</span>
-                </button>
+              <div className="flex items-center gap-3 shrink-0">              
                 <button
                   onClick={onClose}
-                  className="hidden md:flex w-11 h-11 items-center justify-center rounded-xl bg-white text-gray-900 shadow-sm hover:shadow-md transition-all border border-slate-100"
+                  aria-label="Close modal"
+                  className="hidden md:flex w-12 h-12 items-center justify-center rounded-xl bg-gradient-to-b from-white to-slate-50 text-slate-400 shadow-sm hover:shadow-md hover:text-red-500 hover:bg-red-50 transition-all duration-200 border border-slate-200 active:scale-95"
                 >
-                  <span className="text-xl">✕</span>
+                  <X size={20} strokeWidth={2.5} />
                 </button>
               </div>
             </div>
           </div>
 
           {/* Description Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-indigo-600">
-              <span className="text-2xl">📝</span>
-              <h3 className="text-lg font-bold">Description</h3>
+          <section className="space-y-5" aria-labelledby="description-heading">
+            <div className="flex items-center gap-3 text-indigo-600">
+              <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+                <TfiAlignLeft size={18} strokeWidth={1.5} />
+              </div>
+              <h2 id="description-heading" className="text-xl font-bold tracking-tight">
+                Description
+              </h2>
             </div>
 
-            <div className="text-gray-600 leading-relaxed text-lg max-w-3xl">
+            <div className="text-slate-600 leading-relaxed text-[15.5px] max-w-3xl">
               {task.description ? (
-                <p className="whitespace-pre-line">{task.description}</p>
+                <p className="whitespace-pre-line font-medium">
+                  {task.description}
+                </p>
               ) : (
-                <p className="text-gray-400 italic">No description provided</p>
+                <p className="text-slate-400 italic font-normal bg-slate-50 px-4 py-3 rounded-xl border border-slate-100">
+                  No description provided for this task.
+                </p>
               )}
             </div>
-          </div>
+          </section>
 
-          {/* Difficulty & Estimate */}
-          {(task.difficulty || task.estimateHours) && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-indigo-600">
-                <span className="text-2xl">📊</span>
-                <h3 className="text-lg font-bold">Task Metrics</h3>
-              </div>
-
-              <div className="flex gap-4 flex-wrap">
-                {task.difficulty && (
-                  <div className="px-4 py-2 bg-amber-50 rounded-xl border border-amber-200">
-                    <p className="text-xs font-bold uppercase tracking-wider text-amber-600 mb-1">
-                      Difficulty
-                    </p>
-                    <p className="text-sm font-semibold text-amber-900">
-                      {task.difficulty}
-                    </p>
-                  </div>
-                )}
-
-                {task.estimateHours && (
-                  <div className="px-4 py-2 bg-blue-50 rounded-xl border border-blue-200">
-                    <p className="text-xs font-bold uppercase tracking-wider text-blue-600 mb-1">
-                      Estimate
-                    </p>
-                    <p className="text-sm font-semibold text-blue-900">
-                      {task.estimateHours}h
-                    </p>
-                  </div>
-                )}
-              </div>
+          {/* Comments Section */}
+          <section 
+            className=" border-t flex flex-col"
+            aria-label="Comments"
+          >
+            <div className="max-h-[470px] overflow-y-auto pr-2">
+              <CommentSection taskId={task.id} />
             </div>
-          )}
-
-          {/* Activity Log / Comments */}
-          <div className="space-y-6 pt-6 border-t border-slate-200">
-            <div className="flex items-center gap-2 text-indigo-600">
-              <span className="text-2xl">💬</span>
-              <h3 className="text-lg font-bold">Activity</h3>
-            </div>
-
-            <CommentSection taskId={task.id} />
-          </div>
+          </section>
         </div>
 
-        {/* Sidebar Metadata */}
-        <aside className="w-full md:w-80 bg-slate-50/80 p-8 md:p-12 space-y-10 border-l border-white/50">
-          {/* Status & Priority */}
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">
-                Status
+        {/* Sidebar - Right */}
+        <aside className="w-full md:w-80 lg:w-96 bg-gradient-to-b from-slate-50/80 to-slate-100/40 p-6 md:p-10 lg:p-12 space-y-10 border-l border-slate-200/80 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
+          
+          {/* Status & Difficulty Group */}
+          <div className="space-y-8">
+            {/* Status */}
+            <div className="space-y-3.5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                Current Status
               </p>
-              <div
-                className={`inline-flex items-center gap-2 px-3 py-1.5 ${statusStyle.bg} ${statusStyle.text} rounded-full`}
-              >
-                <div className={`w-2 h-2 rounded-full ${statusStyle.text.replace('text-', 'bg-')} animate-pulse`}></div>
-                <span className="text-sm font-bold">{statusStyle.label}</span>
-              </div>
+              <StatusBadge columnId={task.columnId} />
             </div>
 
+            {/* Difficulty */}
             {task.difficulty && (
-              <div className="space-y-2">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">
-                  Difficulty
+              <div className="space-y-3.5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                  Difficulty Level
                 </p>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 text-amber-700 rounded-full">
-                  <span className="text-base">⚡</span>
-                  <span className="text-sm font-bold">{task.difficulty}</span>
+                <div className="inline-flex items-center gap-2.5 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200 hover:scale-[1.02]">
+                  <Gauge size={16} className="text-indigo-600" strokeWidth={2.5} />
+                  <span className="text-sm font-bold text-slate-900 uppercase tracking-tight">
+                    {task.difficulty}
+                  </span>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Timeline */}
-          <div className="space-y-6">
-            <div className="flex items-start gap-3">
-              <div>
-                <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-gray-500">
-                  STATUS
-                </p>
-                <p className="text-sm font-semibold text-gray-900">{}</p>
-              </div>
-            </div>
-
+          {/* Timeline Group */}
+          <div className="space-y-7 pt-10 border-t border-slate-200/70">
             {task.dueDate && (
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-gray-500 shadow-sm">
-                  <span className="text-xl">📅</span>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">
-                    Due Date
-                  </p>
-                  <p className="text-sm font-semibold text-gray-900">
-                    {dayjs(task.dueDate).format("MMM DD, YYYY")}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {dayjs(task.dueDate).format("HH:mm")}
-                  </p>
-                </div>
-              </div>
+              <InfoItem
+                icon={MdOutlineDateRange}
+                label="Due Date"
+                value={dayjs(task.dueDate).format("MMM DD, YYYY • HH:mm")}
+              />
             )}
 
             {task.estimateHours && (
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-gray-500 shadow-sm">
-                  <span className="text-xl">⏱️</span>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">
-                    Estimate
-                  </p>
-                  <p className="text-sm font-semibold text-gray-900">
-                    {task.estimateHours} hours
-                  </p>
-                </div>
-              </div>
+              <InfoItem
+                icon={IoMdTime}
+                label="Time Estimate"
+                value={`${task.estimateHours} hours`}
+              />
             )}
-          </div>
-
-          {/* Bottom Sidebar Action */}
-          <div className="pt-6 border-t border-slate-200/50">
-            <button className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-white text-red-600 font-bold text-sm shadow-sm hover:bg-red-50 transition-colors">
-              <span className="text-lg">🗑️</span>
-              <span>Delete Task</span>
-            </button>
           </div>
         </aside>
       </div>
