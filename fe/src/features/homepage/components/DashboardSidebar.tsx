@@ -23,21 +23,26 @@ export function DashboardSidebar({ tasks: fallbackTasks = [] }: DashboardSidebar
   const allTasks = myTasks.length > 0 ? myTasks : fallbackTasks;
 
   const upcomingTasks = allTasks
-    .filter(task =>
-      task.dueDate &&
-      new Date(task.dueDate) > new Date() &&
-      !task.completedAt
-    )
+    .filter(task => {
+      if (!task.dueDate || task.completedAt) return false;
+
+      const dueDate = new Date(task.dueDate);
+      const now = new Date();
+      const twoDaysLater = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
+
+      return dueDate > now && dueDate <= twoDaysLater;
+    })
+    .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
     .slice(0, 5);
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return {
-      month: date.toLocaleDateString("en-US", { month: "short" }).toUpperCase(),
-      day: date.getDate(),
+    const formatDate = (dateStr: string) => {
+      const date = new Date(dateStr);
+      return {
+        month: date.toLocaleDateString("en-US", { month: "short" }).toUpperCase(),
+        day: date.getDate(),
+      };
     };
-  };
-
+    console.log(upcomingTasks)
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-8 mt-12">
 

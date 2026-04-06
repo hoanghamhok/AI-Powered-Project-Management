@@ -14,7 +14,6 @@ interface TaskDetailModalProps {
   onClose: () => void;
 }
 
-// Sub-component: Status Badge
 const StatusBadge = ({ columnId }: { columnId: string }) => {
   const statusMap: Record<string, { bg: string; text: string; label: string }> = {
     'todo': { bg: 'bg-slate-500/10', text: 'text-slate-600', label: 'To Do' },
@@ -32,7 +31,6 @@ const StatusBadge = ({ columnId }: { columnId: string }) => {
   );
 };
 
-// Sub-component: Info Item
 const InfoItem = ({ 
   icon: Icon, 
   label, 
@@ -67,16 +65,13 @@ const InfoItem = ({
 export function TaskDetailModal({ task, onClose }: TaskDetailModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Focus trap và ESC handler
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     
-    // Focus vào modal khi mở
     modalRef.current?.focus();
     
-    // Prevent scroll
     document.body.style.overflow = 'hidden';
     
     window.addEventListener("keydown", handleEsc);
@@ -100,7 +95,6 @@ export function TaskDetailModal({ task, onClose }: TaskDetailModalProps) {
         tabIndex={-1}
         className="bg-white w-full max-w-6xl h-full max-h-[92vh] rounded-3xl md:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row border border-slate-200/60 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300"
       >
-        {/* Close Button - Mobile */}
         <button
           onClick={onClose}
           aria-label="Close modal"
@@ -109,12 +103,9 @@ export function TaskDetailModal({ task, onClose }: TaskDetailModalProps) {
           <X size={20} strokeWidth={2.5} />
         </button>
 
-        {/* Main Content - Left */}
         <div className="flex-1 p-6 md:p-12 lg:p-16 space-y-12 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
           
-          {/* Header Section */}
           <div className="space-y-6">
-            {/* Breadcrumb */}
             <nav 
               className="flex items-center gap-2 text-[11px] font-bold tracking-[0.2em] text-gray-400 uppercase"
               aria-label="Breadcrumb"
@@ -124,7 +115,6 @@ export function TaskDetailModal({ task, onClose }: TaskDetailModalProps) {
               <span className="text-indigo-600">Task-{task.id}</span>
             </nav>
 
-            {/* Title & Actions */}
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
               <h1 
                 id="task-title"
@@ -145,7 +135,6 @@ export function TaskDetailModal({ task, onClose }: TaskDetailModalProps) {
             </div>
           </div>
 
-          {/* Description Section */}
           <section className="space-y-5" aria-labelledby="description-heading">
             <div className="flex items-center gap-3 text-indigo-600">
               <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
@@ -169,7 +158,6 @@ export function TaskDetailModal({ task, onClose }: TaskDetailModalProps) {
             </div>
           </section>
 
-          {/* Comments Section */}
           <section 
             className=" border-t flex flex-col"
             aria-label="Comments"
@@ -180,12 +168,9 @@ export function TaskDetailModal({ task, onClose }: TaskDetailModalProps) {
           </section>
         </div>
 
-        {/* Sidebar - Right */}
         <aside className="w-full md:w-80 lg:w-96 bg-gradient-to-b from-slate-50/80 to-slate-100/40 p-6 md:p-10 lg:p-12 space-y-10 border-l border-slate-200/80 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
           
-          {/* Status & Difficulty Group */}
           <div className="space-y-8">
-            {/* Status */}
             <div className="space-y-3.5">
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
                 Current Status

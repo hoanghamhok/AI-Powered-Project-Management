@@ -17,7 +17,7 @@ export function CommentItem({ comment, replies, onReply, onDelete, isReply = fal
   const [showActions, setShowActions] = useState(false);
 
   function highlightMentions(text: string) {
-    const parts = text.split(/(@\w+)/g);
+    const parts = text.split(/(@[^\s]+(?:\s[^\s]+)*)/g);
 
     return parts.map((part, i) => {
       if (part.startsWith("@")) {
@@ -128,7 +128,6 @@ export function CommentItem({ comment, replies, onReply, onDelete, isReply = fal
           </p>
         </div>
 
-        {/* Action buttons - mobile view */}
         <div className="flex gap-4 mt-1.5 px-2 md:hidden">
           <button
             onClick={() => onReply(comment.id, comment.author.fullName)}

@@ -118,7 +118,6 @@ export function ColumnCard({
           </div>
 
           <input
-            autoFocus
             placeholder="Task title…"
             value={isEdit ? editingTaskTitle : undefined}
             onChange={isEdit ? (e) => setEditingTaskTitle(e.target.value) : undefined}
@@ -200,6 +199,8 @@ export function ColumnCard({
               <div className="flex flex-wrap gap-2">
                 {members.map((m: any) => {
                   const selected = editingTaskAssignees.includes(m.userId);
+                  const avatar =m.user?.avatarUrl || m.avatarUrl || null;
+                  const username = m.user?.username || m.username || null;
                   return (
                     <button
                       key={m.id}
@@ -222,7 +223,15 @@ export function ColumnCard({
                           m.userId
                         )}`}
                       >
-                        {getInitials(m.user?.username ?? "")}
+                        {
+                            avatar ? (
+                            <img
+                              src={avatar}
+                              alt={username}
+                              className="w-full h-full object-cover rounded-full"
+                            />
+                          ) : (getInitials(m.user?.username ?? ""))
+                        }
                       </span>
                       {m.user?.username}
                     </button>
