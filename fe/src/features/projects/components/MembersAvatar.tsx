@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useProjectMembers } from "../../members/hooks/useProjectMembers";
 import { useRemoveMember } from "../../members/hooks/useRemoveMeber";
 import { useSetRoleMember } from "../../members/hooks/useSetRoleMember";
-import { ConfirmModal } from "../../shared/components/ModalConfirm";
+import { useConfirm } from "../../shared/components/ConfirmContext";
 import { UserPlus } from "lucide-react";
 
 interface MembersAvatarProps {
@@ -10,7 +10,7 @@ interface MembersAvatarProps {
   isAdmin: boolean;
   canSetOwner: boolean;
   onInviteClick: () => void;
-  currentUserId?:string;
+  currentUserId?: string;
 }
 
 export function MembersAvatar({
@@ -18,7 +18,7 @@ export function MembersAvatar({
   isAdmin,
   canSetOwner,
   onInviteClick,
-  currentUserId
+  currentUserId,
 }: MembersAvatarProps) {
   const { data: membersRes, isLoading } = useProjectMembers(projectId);
 
@@ -27,19 +27,14 @@ export function MembersAvatar({
     : membersRes?.data || [];
 
   const [menuMemberId, setMenuMemberId] = useState<string | null>(null);
-  const [selectedMember, setSelectedMember] = useState<any>(null);
-  const [confirmAction, setConfirmAction] = useState<
-    "ADMIN" | "REMOVE_ADMIN" | "OWNER" | "KICK" | null
-  >(null);
-
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { removeMember, isLoading: removing } = useRemoveMember(projectId);
-  const { setRole, isLoading: settingRole } = useSetRoleMember(projectId);
+  const { removeMember } = useRemoveMember(projectId);
+  const { setRole } = useSetRoleMember(projectId);
 
-  const isConfirmLoading = removing || settingRole;
+  const { openConfirm } = useConfirm();
 
-  /* close menu when clicking outside */
+  //click ra ngoài đóng modal
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (!containerRef.current?.contains(e.target as Node)) {
@@ -63,31 +58,10 @@ export function MembersAvatar({
     "bg-red-500",
   ];
 
-  const handleConfirm = () => {
-    if (!selectedMember || !confirmAction) return;
-
-    const userId = selectedMember.userId;
-
-    if (confirmAction === "KICK") removeMember(userId);
-
-    if (confirmAction === "ADMIN")
-      setRole({ targetUserId: userId, role: "ADMIN" });
-
-    if (confirmAction === "REMOVE_ADMIN")
-      setRole({ targetUserId: userId, role: "MEMBER" });
-
-    if (confirmAction === "OWNER")
-      setRole({ targetUserId: userId, role: "OWNER" });
-
-    setConfirmAction(null);
-    setSelectedMember(null);
-  };
-
-
-
   if (isLoading) {
     return <span className="text-xs text-gray-500">Loading...</span>;
   }
+
   return (
     <div ref={containerRef} className="flex items-center gap-2 relative">
       {/* avatars */}
@@ -98,16 +72,16 @@ export function MembersAvatar({
 
           const avatar =
             member.user?.avatarUrl || member.avatarUrl || null;
+
           const isSelf = member.userId === currentUserId;
+
           return (
             <div key={member.id} className="relative">
+              {/* avatar */}
               <div
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (!isAdmin) return;
-                  if (isSelf) return;
-
-                  setSelectedMember(member);
+                  if (!isAdmin || isSelf) return;
 
                   setMenuMemberId((prev) =>
                     prev === member.id ? null : member.id
@@ -133,10 +107,20 @@ export function MembersAvatar({
               {/* menu */}
               {isAdmin && menuMemberId === member.id && !isSelf && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-44 bg-white border rounded-md shadow-lg text-xs z-30">
+                  
+                  {/* Set Admin */}
                   {member.role !== "ADMIN" && member.role !== "OWNER" && (
                     <button
                       onClick={() => {
-                        setConfirmAction("ADMIN");
+                        openConfirm({
+                          title: "Set as Admin",
+                          message: `Make ${username} an admin?`,
+                          onConfirm: () =>
+                            setRole({
+                              targetUserId: member.userId,
+                              role: "ADMIN",
+                            }),
+                        });
                         setMenuMemberId(null);
                       }}
                       className="w-full px-3 py-2 text-left hover:bg-gray-100"
@@ -145,10 +129,19 @@ export function MembersAvatar({
                     </button>
                   )}
 
+                  {/* Remove Admin */}
                   {member.role === "ADMIN" && (
                     <button
                       onClick={() => {
-                        setConfirmAction("REMOVE_ADMIN");
+                        openConfirm({
+                          title: "Remove Admin",
+                          message: `Remove admin role from ${username}?`,
+                          onConfirm: () =>
+                            setRole({
+                              targetUserId: member.userId,
+                              role: "MEMBER",
+                            }),
+                        });
                         setMenuMemberId(null);
                       }}
                       className="w-full px-3 py-2 text-left hover:bg-gray-100"
@@ -157,10 +150,19 @@ export function MembersAvatar({
                     </button>
                   )}
 
+                  {/* Set Owner */}
                   {canSetOwner && member.role !== "OWNER" && (
                     <button
                       onClick={() => {
-                        setConfirmAction("OWNER");
+                        openConfirm({
+                          title: "Set as Owner",
+                          message: `Transfer ownership to ${username}?`,
+                          onConfirm: () =>
+                            setRole({
+                              targetUserId: member.userId,
+                              role: "OWNER",
+                            }),
+                        });
                         setMenuMemberId(null);
                       }}
                       className="w-full px-3 py-2 text-left hover:bg-gray-100"
@@ -169,10 +171,15 @@ export function MembersAvatar({
                     </button>
                   )}
 
+                  {/* Kick */}
                   {member.role !== "OWNER" && (
                     <button
                       onClick={() => {
-                        setConfirmAction("KICK");
+                        openConfirm({
+                          title: "Kick User",
+                          message: `Are you sure you want to remove ${username}?`,
+                          onConfirm: () => removeMember(member.userId),
+                        });
                         setMenuMemberId(null);
                       }}
                       className="w-full px-3 py-2 text-left text-red-600 hover:bg-red-50"
@@ -191,33 +198,15 @@ export function MembersAvatar({
       {isAdmin && (
         <button
           onClick={onInviteClick}
-          className={`
-            group relative flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium
-            border transition-all duration-200
-            border-blue-200 text-blue-500 bg-white
-            hover:bg-blue-500 hover:text-white hover:border-blue-500
-            hover:shadow-md hover:shadow-blue-100 active:scale-95
-          `}
+          className="group relative flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium
+          border transition-all duration-200
+          border-blue-200 text-blue-500 bg-white
+          hover:bg-blue-500 hover:text-white hover:border-blue-500
+          hover:shadow-md hover:shadow-blue-100 active:scale-95"
         >
           <UserPlus className="w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
           <span>Add</span>
         </button>
-      )}
-
-      {/* confirm modal */}
-      {confirmAction && selectedMember && (
-        <ConfirmModal
-          title="Confirm action"
-          description={`Are you sure you want to apply this action to ${
-            selectedMember.user?.username || "this user"
-          }?`}
-          onCancel={() => {
-            setConfirmAction(null);
-            setSelectedMember(null);
-          }}
-          onConfirm={handleConfirm}
-          loading={isConfirmLoading}
-        />
       )}
     </div>
   );

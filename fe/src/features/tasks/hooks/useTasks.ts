@@ -10,7 +10,6 @@ export function useTask(projectId: string) {
     enabled: !!projectId,
     queryFn: async () => {
       const res = await fetchTasksByProjectID(projectId);
-            console.log(res);
       return res.data;
 
     },
@@ -20,7 +19,7 @@ export function useTask(projectId: string) {
     mutationFn: createTask,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks", projectId] });
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      // queryClient.invalidateQueries({ queryKey: ["tasks"] });//hiện 1 prj 1 lúc thì ko cần cái này 
     },
   });
 

@@ -75,8 +75,8 @@
             ↓
     UI:
     hiển thị "1"
-
 gồm store:kho dữ liệu,action:yêu cầu thay đổi,reducer:người xử lí(nhận state hiện tại và action=> trả về state mới)
+Middleware = nơi “chặn / xử lý / chỉnh sửa / log / làm async” action trước khi reducer nhận nó.
 
 #React.memo:chỉ so sánh props bằng references
     bình thường component cha re-render => con re render
@@ -93,21 +93,6 @@ gồm store:kho dữ liệu,action:yêu cầu thay đổi,reducer:người xử 
             gọi API,DOM thủ công,event listener,consolelog để debug,
             react re render thường xuyên => để trong thân hàm sẽ chạy mỗi khi component render => sinh ra useEffect
 
-#trước ProjectDetailPage                    :                  
-  └── ColumnCard                                                    
-        └── ColumnTasksContainer
-              ├── fetch data
-              ├── handle logic
-              ├── render list
-              ├── form add task
-
-#sau    useProjectDetailPage  (logic + data)
-                ↓
-        ProjectDetailPage     (compose UI)
-                ↓
-        ColumnCard            (UI)
-        ├── TaskList       (render list + dnd)
-        └── AddTaskForm    (form riêng)
 
 
 #tx là transaction client-một phiên bản đặc biệt của prisma,đảm bảo mọi query
@@ -116,3 +101,26 @@ bên trong cùng 1 transaction
 #Portal:render component ra chỗ khác DOM -createPortal(<Modal />, document.body)
 
 #useRef tạo ra một đối tượng tham chiếu (ref object) có thể thay đổi và tồn tại xuyên suốt vòng đời của comp, ngay cả khi re-render. dùng để truy cập trực tiếp DOM hoặc lưu trữ các giá trị mà khi thay đổi ko re render
+
+#dữ liệu thay đổi nhưng id không đổi => không re render
+
+#lỗi phát sinh từ API (mời thành viên,sửa project...) nên được quản lý tập trung thay vì tự render một thanh thông báo lỗi thủ công trong header.nó làm header nhẹ hơn.
+
+#over-flow:kiểm soát nội dung hiển thị
+
+#context:truyền dẽ liệu từ cha xuống con mà ko cần props
+        1.cần share gì(state hoặc function hoặc cả 2):user,login()...
+        2.Provider:giữ state,logic,hành vi
+        3.custom hook:export function useAuth() {
+                        const context = useContext(AuthContext);...
+        
+
+#useReducer:const [state, dispatch] = useReducer(reducer, initialState);
+        state:dữ liệu hiện tại
+        dispatch:hàm gửi action
+        reducer:hàm xử lí logic cập nhật state:reducer(state,action)
+                        state:trạng thái hienj tại
+                        action:điều muốn làm
+        initialState:giá trị ban đầu
+
+#zustand không cần provider vì nó tạo ra biến global dùng chung không trong cây component,giống như việc import 1 file JS bình thường (không truyền xuống).

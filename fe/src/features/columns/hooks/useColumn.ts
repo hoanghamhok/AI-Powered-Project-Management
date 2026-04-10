@@ -26,6 +26,7 @@ export function useColumn(projectId: string) {
     mutationFn:deleteColumn,
     onSuccess:() => {
       queryClient.invalidateQueries({ queryKey: ["columns", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", projectId] });//xóa cột thì mất task nên cần refresh data
     }
   })
 
@@ -132,6 +133,8 @@ export function useColumn(projectId: string) {
     columns:columnsQuery.data || [],
     loading:columnsQuery.isLoading,
     error:columnsQuery.error,
+    isAddingLoading: addMutation.isPending,
+    isEditingLoading: editMutation.isPending,
     add,
     remove,
     edit,
