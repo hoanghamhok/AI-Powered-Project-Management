@@ -9,9 +9,88 @@ export class AiService {
     private gemini: GeminiService,
   ) {}
 
+  async generateProjectSummary(projectId: string) {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      include: {
+        owner: true,
+        members: {
+          include: { user: true },
+        },
+        columns: {
+          include: {
+            tasks: {
+              include: {
+                assignees: {
+                  include: { user: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!project) return null;
+
+    // Tính stats
+    const totalTasks = project.columns.reduce(
+      (sum, col) => sum + col.tasks.length,
+      0
+    );
+    const completedTasks = project.columns.reduce(
+      (sum, col) =>
+        sum + col.tasks.filter((t) => t.completedAt).length,
+      0
+    );
+    const overdueTasks = project.columns.reduce(
+      (sum, col) =>
+        sum +
+        col.tasks.filter(
+          (t) => t.dueDate && !t.completedAt && new Date(t.dueDate) < new Date()
+        ).length,
+      0
+    );
+
+    const projectData = {
+      name: project.name,
+      description: project.description,
+      owner: project.owner.fullName,
+      members: project.members.map((m) => m.user.fullName),
+      totalTasks,
+      completedTasks,
+      completionRate: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+      overdueTasks,
+      columns: project.columns.map((c) => ({
+        name: c.title,
+        taskCount: c.tasks.length,
+      })),
+    };
+
+    const prompt = `
+Bạn là một chuyên gia phân tích dự án. Dựa vào dữ liệu dự án sau, hãy tạo một bản tóm tắt ngắn gọn bằng tiếng Việt (2-3 câu).
+Tóm tắt cần nêu rõ dự án này đang làm về nội dung gì, trạng thái dự án, tiến độ và các chỉ số chính.
+
+Dữ liệu dự án:
+${JSON.stringify(projectData, null, 2)}
+
+Chỉ trả về văn bản tóm tắt, không định dạng thêm, không dùng gạch đầu dòng.
+`;
+
+    const summary = await this.gemini.generate(prompt);
+
+    // Save summary to database
+    await this.prisma.project.update({
+      where: { id: projectId },
+      data: { summary },
+    });
+
+    return summary;
+  }
+
   async ask(question: string, projectId: string) {
     if (!question) {
-        throw new Error("question is required");
+      throw new Error("question is required");
     }
 
     const lowerQ = question.toLowerCase();
@@ -19,9 +98,9 @@ export class AiService {
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
       include: {
-        members:{
-          include:{
-            user:true,
+        members: {
+          include: {
+            user: true,
           }
         },
         columns: {
@@ -54,7 +133,7 @@ export class AiService {
 
     // Task đang làm (DOING)
     if (lowerQ.includes("đang làm") || lowerQ.includes("doing")) {
-      const doing = project.columns.find(c =>
+      const doing = project.columns.find((c) =>
         c.title.toLowerCase().includes("doing"),
       );
       return doing
@@ -62,10 +141,8 @@ export class AiService {
         : "Không có cột DOING";
     }
 
-    //context cho AI
-
+    // context cho AI
     const context = JSON.stringify(project, null, 2);
-    console.log(project);
     const prompt = `
   You are an AI assistant for a Kanban project.
 
@@ -86,8 +163,7 @@ export class AiService {
   ${question}
   `;
 
-//gọi AI
-
+    // gọi AI
     return this.gemini.generate(prompt);
   }
 }

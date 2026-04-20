@@ -52,7 +52,6 @@ const HomeNavbar = () => {
     window.location.reload();
   };
 
-  console.log("Notifications:", notifications);
   return (
     <header className="w-full h-16 sticky top-0 z-20 flex justify-between items-center px-10 bg-[#f7f9fb]">
       {/* Search */}

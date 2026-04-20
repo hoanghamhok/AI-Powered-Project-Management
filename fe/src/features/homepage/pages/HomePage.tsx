@@ -14,7 +14,7 @@ const HomePage = () => {
   const { data: myTasks } = useMyTasks();
   const displayedProjects = projects?.slice(0, 3) || [];
   const hasMoreProjects = (projects?.length || 0) > 3;
-
+  console.log(projects);
   const currentDate = new Date();
   const onTrackCount = myTasks?.filter(task => 
     !task.completedAt && task.dueDate && new Date(task.dueDate) > currentDate

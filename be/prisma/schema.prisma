@@ -58,6 +58,7 @@ model Project {
   id          String          @id @default(cuid())
   name        String
   description String?
+  summary     String?
   created_at  DateTime        @default(now())
   updated_at  DateTime        @updatedAt
   ownerId     String

@@ -25,9 +25,16 @@ export class GeminiService {
 
     console.log("GEMINI:", JSON.stringify(data, null, 2));
 
-    return (
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "AI không trả lời được"
-    );
+    if (!res.ok) {
+      throw new Error(`Gemini API error: ${res.status} ${res.statusText}`);
+    }
+
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!text || text.trim() === "") {
+      throw new Error("AI không trả lời được");
+    }
+
+    return text;
   }
 }
