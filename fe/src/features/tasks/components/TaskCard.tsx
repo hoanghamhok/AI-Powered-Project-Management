@@ -47,7 +47,7 @@ export function TaskCard({ taskId, projectId }: TaskCardProps) {
 
   const getInitials = (m: any) =>
     m.user?.username?.[0].toUpperCase() || "?";
-
+  console.log(task);
   return (
     <>
       <div
@@ -87,8 +87,12 @@ export function TaskCard({ taskId, projectId }: TaskCardProps) {
         {/* Drag Handle + Title */}
         <div
           {...attributes}
-          {...(task.blocked ? {} : listeners)}
-          className={`${task.blocked ? "cursor-not-allowed" : "cursor-grab active:cursor-grabbing"} select-none`}
+          {...(task.blocked || task.isBlockedByDependency ? {} : listeners)}
+          className={`${
+            task.blocked || task.isBlockedByDependency
+              ? "cursor-not-allowed opacity-70"
+              : "cursor-grab active:cursor-grabbing"
+          } select-none`}
         >
           <div className="flex items-start justify-between gap-2">
             <h3 className={`text-sm font-medium leading-tight line-clamp-2 flex-1 truncate transition-colors ${
