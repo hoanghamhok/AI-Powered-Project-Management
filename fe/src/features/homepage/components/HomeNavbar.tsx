@@ -45,13 +45,15 @@ const HomeNavbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleAccept = (token: string) => {
+  const handleAccept = (token: string) =>
     acceptMutation.mutate(token, {
-      onSuccess: () => setInviteToken(null),
-    });
-    window.location.reload();
-  };
-  console.log(notifications)
+      onSuccess: (d) => {
+        setInviteToken(null);
+        setShowNoti(false);
+        navigate(`/projects/${d.projectId}`);
+      },
+  });
+
   return (
     <header className="w-full h-16 sticky top-0 z-20 flex justify-between items-center px-10 bg-[#f7f9fb]">
       {/* Search */}
@@ -67,7 +69,7 @@ const HomeNavbar = () => {
 
       {/* Right */}
       <div className="flex items-center gap-6">
-        {/* NOTIFICATIONS */}
+      {/* NOTIFICATIONS */}
         <div className="relative" ref={notiRef}>
           <button
             onClick={() => {
@@ -78,7 +80,7 @@ const HomeNavbar = () => {
             }}
             className="p-2 rounded-full hover:bg-white/50 relative"
           >
-            <IoMdNotifications className="text-indigo-500" />
+            <IoMdNotifications className="material-symbols-outlined" />
 
             {unread > 0 && (
               <span className="absolute top-0 right-0 text-xs bg-red-500 text-white rounded-full px-1">
@@ -87,56 +89,97 @@ const HomeNavbar = () => {
             )}
           </button>
 
-          {showNoti && (
-            <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg overflow-hidden">
-              {notifications.length === 0 ? (
-                <div className="p-4 text-sm text-slate-500 text-center">
-                  No notifications
+            {showNoti && (
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 z-30 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+                  <h3 className="font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                    <IoMdNotifications className="text-indigo-500" />
+                    Thông báo
+                    {unread > 0 && (
+                      <span className="ml-2 text-xs bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full">
+                        {unread} chưa đọc
+                      </span>
+                    )}
+                  </h3>
+                  {/* {unread > 0 && (
+                    <button
+                      onClick={() => markRead.mutate(notifications.filter(n => !n.read).map(n => n.id))}
+                      className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                    >
+                      Đánh dấu đã đọc
+                    </button>
+                  )} */}
                 </div>
-              ) : (
-                notifications.map((n) => (
-                  <div
-                    key={n.id}
-                    className={`p-3 text-sm border-b hover:bg-slate-50 transition-colors cursor-pointer ${
-                      !n.read ? "bg-indigo-50/50" : ""
-                    }`}
-                    onClick={() => {
-                      if (!n.read) markRead.mutate(n.id);
-                      if (n.type === "INVITE_RECEIVED") {
-                        setInviteToken(n.data.inviteToken ?? null);
-                      }
-                    }}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 mt-0.5">
-                        {n.type === "INVITE_RECEIVED" ? (
-                          <span className="text-lg">📨</span>
-                        ) : n.type === "TASK_EXPIRING" ? (
-                          <span className="text-lg">⏰</span>
-                        ) : n.type === "TASK_HIGH_RISK" ? (
-                          <span className="text-lg">⚠️</span>
-                        ) : (
-                          <span className="text-lg">🔔</span>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`${!n.read ? "font-medium text-slate-800" : "text-slate-600"}`}>
-                          {n.data.message}
-                        </p>
-                        {n.createdAt && (
-                          <p className="text-[10px] text-slate-400 mt-1">
-                            {new Date(n.createdAt).toLocaleString("vi-VN")}
-                          </p>
-                        )}
-                      </div>
-                      <DeleteNotification notiId={n.id} />
+
+                {/* Danh sách thông báo */}
+                <div className="max-h-[60vh] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/50">
+                  {notifications.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-slate-400 dark:text-slate-500">
+                      <IoMdNotifications className="text-3xl mb-2 opacity-40" />
+                      <span className="text-sm">Không có thông báo nào</span>
                     </div>
-                  </div>
-                ))
-              )}
-            </div>
-            
-          )}
+                  ) : (
+                    notifications.map(n => (
+                      <div
+                        key={n.id}
+                        className={`group relative px-4 py-3 transition-all duration-150 cursor-pointer ${
+                          !n.read
+                            ? 'bg-indigo-50/50 dark:bg-indigo-950/20 border-l-4 border-l-indigo-500'
+                            : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                        }`}
+                        onClick={() => {
+                          if (!n.read) markRead.mutate(n.id);
+                          if (n.type === 'INVITE_RECEIVED' && n.data.inviteToken) {
+                            setInviteToken(n.data.inviteToken);
+                          }
+                        }}
+                      >
+                        <div className="flex items-start gap-3">
+                          {/* Icon theo loại */}
+                          <div className="flex-shrink-0 mt-0.5">
+                            {n.type === 'INVITE_RECEIVED' ? (
+                              <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                                <span className="text-amber-600 dark:text-amber-400 text-sm">📨</span>
+                              </div>
+                            ) : n.type === 'TASK_EXPIRING' ? (
+                              <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                                <span className="text-red-600 dark:text-red-400 text-sm">⏰</span>
+                              </div>
+                            ) : n.type === 'TASK_HIGH_RISK' ? (
+                              <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                                <span className="text-orange-600 dark:text-orange-400 text-sm">⚠️</span>
+                              </div>
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                                <span className="text-slate-500 dark:text-slate-400 text-sm">🔔</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Nội dung */}
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm ${!n.read ? 'font-medium text-slate-800 dark:text-slate-100' : 'text-slate-600 dark:text-slate-400'}`}>
+                              {n.data.message}
+                            </p>
+                            {n.createdAt && (
+                              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                                {new Date(n.createdAt).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Nút xoá */}
+                          <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <DeleteNotification notiId={n.id} />
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
         </div>
 
         {/* INVITE MODAL */}

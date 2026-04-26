@@ -78,7 +78,7 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
             onClick={() => navigate("/")}
             className="text-2xl font-bold tracking-tight text-indigo-700 dark:text-indigo-300 cursor-pointer"
           >
-            PM System
+            Architect
           </span>
 
           {/* SEARCH */}
