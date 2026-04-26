@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import HomeNavbar from "../../homepage/components/HomeNavbar";
 import HomeSidebar from "../../homepage/components/HomeSidebar";
 import {
@@ -8,10 +8,10 @@ import {
   useHighRiskTasks,
 } from "../hooks/useAnalytics";
 import { useProjectsByUser } from "../../projects/hooks/useProjectsByUser";
+import { useAuth } from "../../auth/hooks/useAuth";
 import { ProjectRecentActivity } from "../../activities/components/ProjectRecentActivity";
 
 // Components
-import { Icon } from "../components/Icon";
 import type { StatCardProps } from "../components/StatCard";
 import { StatCard } from "../components/StatCard";
 import { AnalyticsHeader } from "../components/AnalyticsHeader";
@@ -43,15 +43,21 @@ const DATE_OPTIONS = [
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function DashboardContent() {
-  const { data: projects = [] } = useProjectsByUser();
+  const { data: projectMembers = [] } = useProjectsByUser();
+  const { user } = useAuth();
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
   const [selectedDays, setSelectedDays] = useState(30);
 
+  const isSuperAdmin = user?.role === "SUPER_ADMIN";
+  const reportableProjects = projectMembers.filter(pm => 
+    isSuperAdmin || pm.role === "OWNER" || pm.role === "ADMIN"
+  );
+
   useEffect(() => {
-    if (projects.length > 0 && !selectedProjectId) {
-      setSelectedProjectId(projects[0].projectId);
+    if (reportableProjects.length > 0 && !selectedProjectId) {
+      setSelectedProjectId(reportableProjects[0].projectId);
     }
-  }, [projects, selectedProjectId]);
+  }, [reportableProjects, selectedProjectId]);
 
   const { data: stats } = useProjectStats(selectedProjectId);
   const { data: memberPerformance = [] } = useMemberPerformance(selectedProjectId);
@@ -190,7 +196,7 @@ export default function DashboardContent() {
             setSelectedDays={setSelectedDays}
             selectedProjectId={selectedProjectId}
             setSelectedProjectId={setSelectedProjectId}
-            projects={projects}
+            projects={reportableProjects}
             options={DATE_OPTIONS}
             shadow={shadow}
           />

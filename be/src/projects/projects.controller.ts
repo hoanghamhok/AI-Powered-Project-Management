@@ -17,7 +17,7 @@ export class ProjectsController {
     @ApiBearerAuth()
     @Get('my')
     getMyProjects(@Request() req) {
-        return this.projectsService.getUsersProjects(req.user.userId)
+        return this.projectsService.getUsersProjects(req.user.userId, req.user.role)
     }
 
     @UseGuards(JwtAuthGuard)

@@ -55,7 +55,18 @@ export class ProjectsService {
         return project;
     }
 
-    async getUsersProjects(userId: string) {
+    async getUsersProjects(userId: string, role?: SystemRole) {
+        if (role === SystemRole.SUPER_ADMIN) {
+            const projects = await this.prisma.project.findMany();
+            return projects.map((p) => ({
+                id: `super-${p.id}`,
+                projectId: p.id,
+                userId: userId,
+                role: ProjectRole.OWNER,
+                joinedAt: new Date(),
+                project: p,
+            }));
+        }
         return this.prisma.projectMember.findMany({
             where: { userId: userId },
             include: { project: true },

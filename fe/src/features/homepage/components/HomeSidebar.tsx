@@ -4,13 +4,13 @@ import { NewProjectModal } from "../../projects/components/NewProjectModal";
 import { useState } from "react";
 import { 
   FaTh, 
-  FaFolderOpen, 
-  FaTasks, 
-  FaCog,
   FaPlus,
   FaPencilRuler,
   FaChartLine
 } from "react-icons/fa";
+
+import { useAuth } from "../../auth/hooks/useAuth";
+import { useProjectsByUser } from "../../projects/hooks/useProjectsByUser";
 
 const navItemBase =
   "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200";
@@ -23,17 +23,22 @@ const navItemInactive =
 
 const HomeSidebar = () => {
   const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
-  
+  const { user } = useAuth();
+  const { data: projectMembers = [] } = useProjectsByUser();
+
+  const isSuperAdmin = user?.role === "SUPER_ADMIN";
+  const hasReportAccess = isSuperAdmin || projectMembers.some(pm => pm.role === "OWNER" || pm.role === "ADMIN");
+
   return (
     <aside className="h-screen w-64 fixed left-0 top-0 z-10 bg-[#f2f4f6] flex flex-col py-8 px-6">
       {/* Logo */}
       <div className="mb-8 px-2">
         <div className="flex items-center gap-2 mb-1">
           <FaPencilRuler className="text-[#3525cd] text-lg" />
-          <h1 className="font-bold text-[#3525cd] text-xl">Architect</h1>
+          <h1 className="font-bold text-[#3525cd] text-xl whitespace-nowrap">PM System</h1>
         </div>
         <p className="text-xs text-slate-500 uppercase mt-1">
-          Design Studio
+          With AI-Powered
         </p>
       </div>
 
@@ -70,15 +75,17 @@ const HomeSidebar = () => {
           <span>My Tasks</span>
         </NavLink> */}
 
-        <NavLink
-          to="/report"
-          className={({ isActive }) =>
-            `${navItemBase} ${isActive ? navItemActive : navItemInactive}`
-          }
-        >
-          <FaChartLine className="text-base" />
-          <span>Report</span>
-        </NavLink>
+        {hasReportAccess && (
+          <NavLink
+            to="/report"
+            className={({ isActive }) =>
+              `${navItemBase} ${isActive ? navItemActive : navItemInactive}`
+            }
+          >
+            <FaChartLine className="text-base" />
+            <span>Report</span>
+          </NavLink>
+        )}
       </nav>
       
       <NewProjectModal
