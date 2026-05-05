@@ -7,8 +7,8 @@ export class RegisterDto {
     description: 'User email address',
     required: true
   })
-  @IsNotEmpty()
-  @IsEmail()
+  @IsNotEmpty({ message: 'Email không được để trống' })
+  @IsEmail({}, { message: 'Email không hợp lệ' })
   email: string;
 
   @ApiProperty({ 
@@ -16,8 +16,8 @@ export class RegisterDto {
     description: 'User name',
     required: false
   })
-  @IsNotEmpty()
-  @IsString()
+  @IsNotEmpty({ message: 'Tên đăng nhập không được để trống' })
+  @IsString({ message: 'Tên đăng nhập phải là chuỗi ký tự' })
   username: string;
 
   @ApiProperty({ 
@@ -25,8 +25,8 @@ export class RegisterDto {
     description: 'User full name',
     required: false
   })
-  @IsNotEmpty()
-  @IsString()
+  @IsNotEmpty({ message: 'Họ và tên không được để trống' })
+  @IsString({ message: 'Họ và tên phải là chuỗi ký tự' })
   fullname: string;
 
   @ApiProperty({ 
@@ -35,8 +35,8 @@ export class RegisterDto {
     minLength: 6,
     required: true
   })
-  @IsNotEmpty()
-  @IsString()
-  @MinLength(1)
+  @IsNotEmpty({ message: 'Mật khẩu không được để trống' })
+  @IsString({ message: 'Mật khẩu phải là chuỗi ký tự' })
+  @MinLength(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
   password: string;
 }

@@ -42,18 +42,30 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'login' }: Props) => {
         await login({ identifier: email, password });
       }
       onClose();
-    } catch (err: any) {
-        const message =
-          err?.response?.data?.message ||
-          err?.response?.data?.error?.message ||
-          '';
+      } catch (err: any) {
+        const data = err?.response?.data;
+        const message = data?.message;
 
-        if (message === 'Invalid credentials') {
-          setError('Sai email hoặc mật khẩu');
-        } else if (message === 'ACCOUNT_LOGIN_WITH_GOOGLE') {
-          setError('Tài khoản này đăng nhập bằng Google');
+        if (Array.isArray(message)) {
+          // Xử lý lỗi validation từ class-validator (thường là mảng)
+          setError(message[0]); 
+        } else if (typeof message === 'string') {
+          // Xử lý các lỗi cụ thể
+          if (message === 'Invalid credentials') {
+            setError('Thông tin đăng nhập không chính xác');
+          } else if (message === 'ACCOUNT_LOGIN_WITH_GOOGLE') {
+            setError('Tài khoản này đã được đăng ký bằng Google');
+          } else if (message === 'Email already in use') {
+            setError('Email này đã được sử dụng');
+          } else if (message === 'Username already in use') {
+            setError('Tên đăng nhập này đã được sử dụng');
+          } else if (message === 'ACCOUNT_REGISTERED_WITH_PASSWORD') {
+             setError('Email này đã được đăng ký bằng mật khẩu');
+          } else {
+            setError(message || 'Có lỗi xảy ra, vui lòng thử lại');
+          }
         } else {
-          setError('Có lỗi xảy ra');
+          setError('Có lỗi xảy ra, vui lòng thử lại');
         }
       }
   };
@@ -91,6 +103,7 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'login' }: Props) => {
             >
               ✕
             </button>
+
 
             {/* Logo / Brand mark */}
             <div className="mb-6 flex items-center gap-2.5">
@@ -148,7 +161,9 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'login' }: Props) => {
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Email</label>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">
+                  {isLogin ? 'Email hoặc Tên đăng nhập' : 'Email'}
+                </label>
                 <input
                   type='text'
                   className={inputClass('email or username')}
@@ -177,6 +192,7 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'login' }: Props) => {
                       onChange={(e) => setUsername(e.target.value)}
                       onFocus={() => setFocusedField('username')}
                       onBlur={() => setFocusedField(null)}
+                      required
                     />
                   </motion.div>
                 )}

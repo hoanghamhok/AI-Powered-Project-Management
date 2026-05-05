@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSearchParams,useNavigate} from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { authApi } from "../auth.api";
 import type { ResetPasswordResponse, ResetPasswordRequest } from "../type";
 
@@ -13,17 +13,22 @@ export default function ResetPassword() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
-  
-  const resetPassword = async (payload:ResetPasswordRequest):Promise<ResetPasswordResponse> => {
+
+  const resetPassword = async (payload: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
     setLoading(true);
     setError(null);
-    try{
+    try {
       const res = await authApi.resetPassword(payload);
       return res.data;
-    }catch(err){
-      setError("Dat lai mat khau khong thanh cong")
+    } catch (err: any) {
+      const message = err?.response?.data?.message;
+      if (Array.isArray(message)) {
+        setError(message[0]);
+      } else {
+        setError(message || "Đặt lại mật khẩu không thành công");
+      }
       throw err;
-    }finally{
+    } finally {
       setLoading(false);
     }
   }
@@ -40,20 +45,21 @@ export default function ResetPassword() {
     if (password !== confirmPassword) {
       return setError("Mật khẩu xác nhận không khớp");
     }
-    if(!token){
+    if (!token) {
       return setError("Token không tồn tại")
     }
 
     try {
-      const res = await resetPassword({token,password});
+      const res = await resetPassword({ token, password });
       setSuccess(res.message)
       setTimeout(() => {
-        navigate("/auth");
+        navigate("/");
       }, 2000);
     } catch (err: any) {
       setError(
         err?.response?.data?.message || "Token không hợp lệ hoặc đã hết hạn"
-    );}
+      );
+    }
   };
 
   if (!token) {

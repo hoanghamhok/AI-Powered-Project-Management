@@ -1,0 +1,253 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table User {
+  id String [pk]
+  username String [unique, not null]
+  fullName String [not null]
+  avatarUrl String
+  avatarPublicId String
+  email String [unique, not null]
+  password String
+  provider AuthProvider [not null, default: 'LOCAL']
+  googleId String [unique]
+  resetPasswordToken String
+  resetPasswordExpires DateTime
+  role SystemRole [not null, default: 'USER']
+  createdAt DateTime [default: `now()`, not null]
+  memberships ProjectMember [not null]
+  ownedProjects Project [not null]
+  invitation Invitation [not null]
+  notifitcation Notification [not null]
+  taskAssignees TaskAssignee [not null]
+  activityLogs ActivityLog [not null]
+  commentmentions CommentMention [not null]
+  comments Comment [not null]
+}
+
+Table Project {
+  id String [pk]
+  name String [not null]
+  description String
+  summary String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  ownerId String [not null]
+  owner User [not null]
+  members ProjectMember [not null]
+  tasks Task [not null]
+  columns Column [not null]
+  invitation Invitation [not null]
+  activity ActivityLog [not null]
+}
+
+Table ProjectMember {
+  id String [pk]
+  projectId String [not null]
+  userId String [not null]
+  role ProjectRole [not null, default: 'MEMBER']
+  joinedAt DateTime [default: `now()`, not null]
+  project Project [not null]
+  user User [not null]
+
+  indexes {
+    (projectId, userId) [unique]
+  }
+}
+
+Table Column {
+  id String [pk]
+  title String [not null]
+  position Float [not null]
+  closed Boolean [not null, default: false]
+  projectId String [not null]
+  project Project [not null]
+  tasks Task [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Task {
+  id String [pk]
+  title String [not null]
+  description String
+  position Float [not null]
+  dueDate DateTime
+  projectId String [not null]
+  project Project [not null]
+  columnId String [not null]
+  column Column [not null]
+  assignees TaskAssignee [not null]
+  comments Comment [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  completedAt DateTime
+  estimateHours Int
+  difficulty Int
+  blocked Boolean [not null, default: false]
+  blocks TaskBlock [not null]
+  dependencies TaskDependency [not null]
+  blockedBy TaskDependency [not null]
+}
+
+Table TaskDependency {
+  id String [pk]
+  taskId String [not null]
+  dependsOnTaskId String [not null]
+  task Task [not null]
+  dependsOn Task [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (taskId, dependsOnTaskId) [unique]
+  }
+}
+
+Table TaskBlock {
+  id String [pk]
+  taskId String [not null]
+  task Task [not null]
+  reason String [not null]
+  blockedAt DateTime [default: `now()`, not null]
+  unblockedAt DateTime
+}
+
+Table TaskAssignee {
+  taskId String [not null]
+  userId String [not null]
+  task Task [not null]
+  user User [not null]
+
+  indexes {
+    (taskId, userId) [pk]
+  }
+}
+
+Table Invitation {
+  id String [pk]
+  email String [not null]
+  token String [unique, not null]
+  projectId String [not null]
+  inviterId String [not null]
+  role ProjectRole [not null, default: 'MEMBER']
+  status InviteStatus [not null, default: 'PENDING']
+  createdAt DateTime [default: `now()`, not null]
+  expiresAt DateTime [not null]
+  project Project [not null]
+  inviter User [not null]
+}
+
+Table Notification {
+  id String [pk]
+  userId String [not null]
+  type String [not null]
+  data Json
+  read Boolean [not null, default: false]
+  createdAt DateTime [default: `now()`, not null]
+  user User [not null]
+}
+
+Table Comment {
+  id String [pk]
+  content String [not null]
+  taskId String [not null]
+  authorId String [not null]
+  parentId String
+  parent Comment
+  replies Comment [not null]
+  mentions CommentMention [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+  task Task [not null]
+  author User [not null]
+}
+
+Table CommentMention {
+  commentId String [not null]
+  userId String [not null]
+  comment Comment [not null]
+  user User [not null]
+
+  indexes {
+    (commentId, userId) [pk]
+  }
+}
+
+Table ActivityLog {
+  id String [pk]
+  userId String [not null]
+  projectId String [not null]
+  entityId String [not null]
+  entityType String [not null]
+  action String [not null]
+  metadata Json
+  createdAt DateTime [default: `now()`, not null]
+  user User [not null]
+  project Project [not null]
+}
+
+Enum SystemRole {
+  USER
+  SUPER_ADMIN
+}
+
+Enum ProjectRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+Enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+Enum AuthProvider {
+  LOCAL
+  GOOGLE
+}
+
+Ref: Project.ownerId > User.id [delete: Cascade]
+
+Ref: ProjectMember.projectId > Project.id [delete: Cascade]
+
+Ref: ProjectMember.userId > User.id [delete: Cascade]
+
+Ref: Column.projectId > Project.id [delete: Cascade]
+
+Ref: Task.projectId > Project.id [delete: Cascade]
+
+Ref: Task.columnId > Column.id [delete: Cascade]
+
+Ref: TaskDependency.taskId > Task.id [delete: Cascade]
+
+Ref: TaskDependency.dependsOnTaskId > Task.id [delete: Cascade]
+
+Ref: TaskBlock.taskId > Task.id [delete: Cascade]
+
+Ref: TaskAssignee.taskId > Task.id [delete: Cascade]
+
+Ref: TaskAssignee.userId > User.id [delete: Cascade]
+
+Ref: Invitation.projectId > Project.id [delete: Cascade]
+
+Ref: Invitation.inviterId > User.id [delete: Cascade]
+
+Ref: Notification.userId > User.id [delete: Cascade]
+
+Ref: Comment.parentId - Comment.id [delete: Cascade]
+
+Ref: Comment.taskId > Task.id [delete: Cascade]
+
+Ref: Comment.authorId > User.id [delete: Cascade]
+
+Ref: CommentMention.commentId > Comment.id [delete: Cascade]
+
+Ref: CommentMention.userId > User.id [delete: Cascade]
+
+Ref: ActivityLog.userId > User.id [delete: Cascade]
+
+Ref: ActivityLog.projectId > Project.id [delete: Cascade]

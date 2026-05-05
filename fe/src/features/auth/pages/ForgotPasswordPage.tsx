@@ -16,8 +16,13 @@ export default function ForgotPassword() {
     try {
       const res = await authApi.forgotPassword(payload);
       return res.data;
-    } catch (err) {
-      setError("Gửi email thất bại. Vui lòng thử lại.");
+    } catch (err: any) {
+      const message = err?.response?.data?.message;
+      if (Array.isArray(message)) {
+        setError(message[0]);
+      } else {
+        setError(message || "Gửi email thất bại. Vui lòng thử lại.");
+      }
       throw err;
     } finally {
       setLoading(false);
