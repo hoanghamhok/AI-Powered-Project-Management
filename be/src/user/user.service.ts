@@ -49,7 +49,20 @@ export class UsersService {
     }
 
     async getUserById(id: string) {
-        return this.prisma.user.findUnique({ where: { id }, select: { id: true, email: true, role: true, createdAt: true, username: true, fullName: true, avatarUrl: true } });
+        return this.prisma.user.findUnique({
+            where: { id },
+            select: {
+                id: true,
+                email: true,
+                role: true,
+                createdAt: true,
+                username: true,
+                fullName: true,
+                avatarUrl: true,
+                isPremium: true,
+                premiumExpiresAt: true,
+            },
+        });
     }
 
     async findAllUsers() {
@@ -145,6 +158,8 @@ export class UsersService {
                 avatarUrl: true,
                 role: true,
                 createdAt: true,
+                isPremium: true,
+                premiumExpiresAt: true,
             }
         });
     }

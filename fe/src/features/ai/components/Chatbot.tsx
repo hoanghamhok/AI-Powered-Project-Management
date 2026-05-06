@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useAI } from "../hook/useAI";
-
+import { useAuth } from "../../auth/hooks/useAuth";
 interface Message {
   role: "user" | "ai";
   content: string;
@@ -33,9 +33,11 @@ const ChatBox = ({ projectId }: { projectId: string }) => {
     }
   }, [isOpen]);
 
+  const user = useAuth((s) => s.user);
+
   const handleAsk = () => {
     const trimmed = question.trim();
-    if (!trimmed || isPending) return;
+    if (!trimmed || isPending || !user?.isPremium) return;
     setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
     setQuestion("");
     mutate({ question: trimmed, projectId });
@@ -378,6 +380,46 @@ const ChatBox = ({ projectId }: { projectId: string }) => {
           cursor: not-allowed;
         }
 
+        /* Premium Overlay */
+        .chat-premium-lock {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 32px;
+          text-align: center;
+          background: #fafafa;
+        }
+        .premium-lock-icon {
+          font-size: 32px;
+          margin-bottom: 16px;
+        }
+        .premium-lock-title {
+          font-weight: 700;
+          font-size: 15px;
+          color: #1a1a1a;
+          margin-bottom: 8px;
+        }
+        .premium-lock-desc {
+          font-size: 12px;
+          color: #6b6b6b;
+          line-height: 1.6;
+          margin-bottom: 20px;
+        }
+        .premium-upgrade-btn {
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+          color: #fff;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 12px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: transform 0.2s;
+        }
+        .premium-upgrade-btn:hover { transform: scale(1.04); }
+
         @media (max-width: 420px) {
           .chat-panel { width: calc(100vw - 40px); right: 0; }
           .chat-root { bottom: 20px; right: 16px; }
@@ -405,72 +447,90 @@ const ChatBox = ({ projectId }: { projectId: string }) => {
             </div>
           </div>
 
-          {/* Messages */}
-          <div className="chat-messages">
-            {messages.length === 0 && !isPending ? (
-              <div className="chat-empty">
-                <div className="chat-empty-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="#ccc"/>
-                  </svg>
-                </div>
-                <p>Hỏi bất cứ điều gì về dự án của bạn.</p>
-              </div>
-            ) : (
-              <>
-                {messages.map((msg, i) => (
-                  <div key={i} className={`chat-bubble ${msg.role}`}>
-                    <div className={`bubble-avatar ${msg.role === "ai" ? "ai-avatar" : "user-avatar"}`}>
-                      {msg.role === "ai" ? "AI" : "U"}
+          {/* Messages or Premium Lock */}
+          {!user?.isPremium ? (
+            <div className="chat-premium-lock">
+              <div className="premium-lock-icon">✨</div>
+              <h3 className="premium-lock-title">Tính năng Premium</h3>
+              <p className="premium-lock-desc">
+                Trò chuyện với trợ lý AI để tối ưu hóa công việc của bạn. Nâng cấp Premium ngay hôm nay.
+              </p>
+              <button 
+                className="premium-upgrade-btn"
+                onClick={() => window.location.href = '/premium'}
+              >
+                Nâng cấp Premium
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="chat-messages">
+                {messages.length === 0 && !isPending ? (
+                  <div className="chat-empty">
+                    <div className="chat-empty-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="#ccc"/>
+                      </svg>
                     </div>
-                    <div className="bubble-text">{msg.content}</div>
+                    <p>Hỏi bất cứ điều gì về dự án của bạn.</p>
                   </div>
-                ))}
-
-                {isPending && (
-                  <div className="chat-bubble ai">
-                    <div className="bubble-avatar ai-avatar">AI</div>
-                    <div className="bubble-text" style={{ padding: "4px 10px" }}>
-                      <div className="typing-indicator">
-                        <div className="typing-dot" />
-                        <div className="typing-dot" />
-                        <div className="typing-dot" />
+                ) : (
+                  <>
+                    {messages.map((msg, i) => (
+                      <div key={i} className={`chat-bubble ${msg.role}`}>
+                        <div className={`bubble-avatar ${msg.role === "ai" ? "ai-avatar" : "user-avatar"}`}>
+                          {msg.role === "ai" ? "AI" : "U"}
+                        </div>
+                        <div className="bubble-text">{msg.content}</div>
                       </div>
-                    </div>
-                  </div>
+                    ))}
+
+                    {isPending && (
+                      <div className="chat-bubble ai">
+                        <div className="bubble-avatar ai-avatar">AI</div>
+                        <div className="bubble-text" style={{ padding: "4px 10px" }}>
+                          <div className="typing-indicator">
+                            <div className="typing-dot" />
+                            <div className="typing-dot" />
+                            <div className="typing-dot" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {error && (
+                      <p className="chat-error">⚠ Có lỗi xảy ra. Vui lòng thử lại.</p>
+                    )}
+
+                    <div ref={messagesEndRef} />
+                  </>
                 )}
+              </div>
 
-                {error && (
-                  <p className="chat-error">⚠ Có lỗi xảy ra. Vui lòng thử lại.</p>
-                )}
-
-                <div ref={messagesEndRef} />
-              </>
-            )}
-          </div>
-
-          {/* Input */}
-          <div className="chat-input-area">
-            <input
-              ref={inputRef}
-              className="chat-input"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Nhập câu hỏi..."
-              disabled={isPending}
-            />
-            <button
-              className="chat-send"
-              onClick={handleAsk}
-              disabled={isPending || !question.trim()}
-              title="Gửi"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/>
-              </svg>
-            </button>
-          </div>
+              {/* Input */}
+              <div className="chat-input-area">
+                <input
+                  ref={inputRef}
+                  className="chat-input"
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Nhập câu hỏi..."
+                  disabled={isPending}
+                />
+                <button
+                  className="chat-send"
+                  onClick={handleAsk}
+                  disabled={isPending || !question.trim()}
+                  title="Gửi"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/>
+                  </svg>
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Toggle Button */}

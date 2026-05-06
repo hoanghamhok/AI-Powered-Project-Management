@@ -29,6 +29,12 @@ enum InviteStatus {
   REJECTED
 }
 
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
 enum AuthProvider {
   LOCAL
   GOOGLE
@@ -47,6 +53,8 @@ model User {
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
   role                 SystemRole       @default(USER)
+  isPremium            Boolean          @default(false)
+  premiumExpiresAt     DateTime?
   createdAt            DateTime         @default(now())
   memberships          ProjectMember[]
   ownedProjects        Project[]        @relation("ProjectOwner")
@@ -57,6 +65,7 @@ model User {
 
   commentmentions      CommentMention[]
   comments             Comment[]
+  transactions         Transaction[]
 }
 
 model Project {
@@ -250,5 +259,20 @@ model ActivityLog {
 
   @@index([projectId])
   @@index([entityId])
+}
+
+model Transaction {
+  id          String            @id @default(cuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount      Int
+  orderId     String            @unique
+  requestId   String
+  momoTransId String?
+  status      TransactionStatus @default(PENDING)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([userId])
 }
 

@@ -27,6 +27,8 @@ export interface User {
   createdAt?: string;
   fullName?: string;
   avatarUrl?: string;
+  isPremium?: boolean;
+  premiumExpiresAt?: string;
 }
 export interface AuthContextType {
   user: User | null;

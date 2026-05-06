@@ -9,6 +9,8 @@ import { AdminDashboard } from "./features/admin/pages/AdminDashboard";
 import { UserManagement } from "./features/admin/pages/UserManagement";
 import ProtectedAdminRoute from "./features/auth/components/ProtectedAdminRoute";
 import { ProfilePage } from "./features/auth/pages/ProfilePage";
+import { PremiumPage } from "./features/auth/pages/PremiumPage";
+import { PaymentResultPage } from "./features/auth/pages/PaymentResultPage";
 import { useEffect } from "react";
 import { useAuth } from "./features/auth/hooks/useAuth";
 import ProjectLayout from "./features/shared/layout/ProjectLayout";
@@ -38,6 +40,8 @@ function App() {
         {/* DASHBOARD */}
         <Route>
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/premium" element={<PremiumPage />} />
+          <Route path="/payment-result" element={<PaymentResultPage />} />
         </Route>
         <Route path="/report" element={<ReportPage />} />
 

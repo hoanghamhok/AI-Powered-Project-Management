@@ -5,6 +5,7 @@ import { useProjectMembers } from "../../members/hooks/useProjectMembers";
 import { useGenerateSummary } from "../hooks/useGenerateSummary";
 import { useState, useEffect } from "react";
 import { Loader2, Wand2, X } from "lucide-react";
+import { useAuth } from "../../auth/hooks/useAuth";
 
 type ProjectMemberItem = {
   id: string;
@@ -35,9 +36,12 @@ export function ProjectCard({ item }: ProjectCardProps) {
   const { tasks } = useTask(project.id);
   const { data: members = [] } = useProjectMembers(project.id);
   const { mutate: generateSummary, isPending } = useGenerateSummary();
+  const user = useAuth((s) => s.user);
+
   const [summary, setSummary] = useState<string | null>(null);
   const [showSummaryOverlay, setShowSummaryOverlay] = useState(false);
   const [summaryError, setSummaryError] = useState<string | null>(null);
+
   useEffect(() => {
     setSummary((project as any).summary || null);
   }, [project]);
@@ -45,6 +49,7 @@ export function ProjectCard({ item }: ProjectCardProps) {
   const handleGenerateSummary = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!user?.isPremium) return;
     setSummaryError(null); // Reset error state
     generateSummary(project.id, {
       onSuccess: (data: any) => {
@@ -219,50 +224,68 @@ export function ProjectCard({ item }: ProjectCardProps) {
             </div>
 
             <div className="px-5 py-4 space-y-4">
-              {/* AI Summary block */}
-              <div className="bg-gray-50 rounded-xl border border-gray-100 p-4 min-h-[80px]">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Wand2 className="w-3 h-3 text-violet-500" />
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-violet-500">
-                    AI Summary
-                  </span>
-                </div>
-
-                {isPending ? (
-                  <div className="flex items-center gap-2 text-gray-400">
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span className="text-xs">Đang tạo tóm tắt...</span>
-                  </div>
-                ) : summaryError ? (
-                  <p className="text-xs text-red-500 leading-relaxed">{summaryError}</p>
-                ) : summary ? (
-                  <p className="text-xs text-gray-600 leading-relaxed">{summary}</p>
-                ) : (
-                  <p className="text-xs text-gray-400 leading-relaxed italic">
-                    {project.description || "Chưa có mô tả. Nhấn bên dưới để tạo tóm tắt AI."}
+              {!user?.isPremium ? (
+                <div className="bg-indigo-50 rounded-2xl p-6 text-center border border-indigo-100">
+                  <div className="text-3xl mb-3">✨</div>
+                  <h4 className="text-sm font-bold text-gray-900 mb-1">Tóm tắt bằng AI</h4>
+                  <p className="text-[11px] text-gray-500 leading-relaxed mb-4">
+                    Sử dụng trí tuệ nhân tạo để tóm tắt tiến độ và các điểm lưu ý của dự án. Tính năng này chỉ dành cho thành viên Premium.
                   </p>
-                )}
-              </div>
+                  <button
+                    onClick={() => window.location.href = '/premium'}
+                    className="w-full py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold shadow-md hover:bg-indigo-700 transition"
+                  >
+                    Nâng cấp Premium ngay
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* AI Summary block */}
+                  <div className="bg-gray-50 rounded-xl border border-gray-100 p-4 min-h-[80px]">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Wand2 className="w-3 h-3 text-violet-500" />
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-violet-500">
+                        AI Summary
+                      </span>
+                    </div>
 
-              {/* Generate button */}
-              <button
-                onClick={handleGenerateSummary}
-                disabled={isPending}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isPending ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Wand2 className="w-3.5 h-3.5" />
-                )}
-                {isPending
-                  ? "Đang tạo..."
-                  : summaryError
-                    ? "Thử lại"
-                    : summary
-                      ? "Tạo lại"
-                      : "Tạo tóm tắt AI"}
-              </button>
+                    {isPending ? (
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span className="text-xs">Đang tạo tóm tắt...</span>
+                      </div>
+                    ) : summaryError ? (
+                      <p className="text-xs text-red-500 leading-relaxed">{summaryError}</p>
+                    ) : summary ? (
+                      <p className="text-xs text-gray-600 leading-relaxed">{summary}</p>
+                    ) : (
+                      <p className="text-xs text-gray-400 leading-relaxed italic">
+                        {project.description || "Chưa có mô tả. Nhấn bên dưới để tạo tóm tắt AI."}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Generate button */}
+                  <button
+                    onClick={handleGenerateSummary}
+                    disabled={isPending}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isPending ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Wand2 className="w-3.5 h-3.5" />
+                    )}
+                    {isPending
+                      ? "Đang tạo..."
+                      : summaryError
+                        ? "Thử lại"
+                        : summary
+                          ? "Tạo lại"
+                          : "Tạo tóm tắt AI"}
+                  </button>
+                </>
+              )}
 
               {/* Stats grid */}
               <div className="grid grid-cols-2 gap-2">

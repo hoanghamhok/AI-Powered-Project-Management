@@ -5,6 +5,7 @@ import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { AiService } from 'src/ai/ai.service';
+import { PremiumGuard } from 'src/auth/guard/premium.guard';
 
 @Controller('projects')
 export class ProjectsController {
@@ -56,7 +57,7 @@ export class ProjectsController {
     return this.projectsService.deleteProject(projectId, req.user.userId);
     }
 
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, PremiumGuard)
     @ApiBearerAuth()
     @Post(':id/generate-summary')
     async generateSummary(@Param('id') projectId: string) {

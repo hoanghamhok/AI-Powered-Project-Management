@@ -479,6 +479,48 @@ export const ProfilePage: React.FC = () => {
               </div>
             </div>
 
+            {/* Premium widget */}
+            <div className="p-widget" style={{ 
+              background: user.isPremium ? 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' : '#fff',
+              color: user.isPremium ? '#fff' : 'inherit'
+            }}>
+              <h2 className="p-widget__title" style={{ color: user.isPremium ? 'rgba(255,255,255,0.7)' : '#bbb' }}>Premium</h2>
+              {user.isPremium ? (
+                <div className="p-premium-status">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '1.2rem' }}>✨</span>
+                    <span style={{ fontWeight: 600 }}>Tài khoản Premium</span>
+                  </div>
+                  <p style={{ fontSize: '0.75rem', opacity: 0.8 }}>
+                    Hết hạn: {user.premiumExpiresAt ? formatDate(user.premiumExpiresAt) : 'N/A'}
+                  </p>
+                </div>
+              ) : (
+                <div className="p-premium-promo">
+                  <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem' }}>
+                    Sử dụng chatbot AI, tóm tắt dự án và dự đoán rủi ro với gói Premium.
+                  </p>
+                  <button 
+                    onClick={() => navigate('/premium')}
+                    style={{
+                      width: '100%',
+                      padding: '0.6rem',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                      color: '#fff',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
+                    }}
+                  >
+                    Nâng cấp ngay
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Quick actions */}
             <div className="p-widget">
               <h2 className="p-widget__title">Setting</h2>
