@@ -17,7 +17,6 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { CommentsModule } from './comment/comment.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AiModule } from './ai/ai.module';
-import { GeminiModule } from './gemini/gemini.module';
 import { ActivityLogModule } from './activity-log/activity.module';
 import { SearchModule } from './search/search.module';
 import { AnalyticsModule } from './analytics/analytics.module';
@@ -26,10 +25,11 @@ import { TaskDependencyModule } from './task-dependency/task-dependency.module';
 import { RiskPredictionModule } from './risk-prediction/risk-prediction.module';
 import { TaskRemindModule } from './task-remind/task-remind.module';
 import { PaymentModule } from './payment/payment.module';
+import { LlmModule } from './llm/llm.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({isGlobal: true, }),
+    ConfigModule.forRoot({ isGlobal: true, }),
     ScheduleModule.forRoot(),
     PrismaModule,
     UsersModule,
@@ -43,7 +43,7 @@ import { PaymentModule } from './payment/payment.module';
     NotificationsModule,
     CommentsModule,
     AiModule,
-    GeminiModule,
+    LlmModule,
     ActivityLogModule,
     SearchModule,
     AnalyticsModule,
@@ -56,4 +56,4 @@ import { PaymentModule } from './payment/payment.module';
   controllers: [NotificationsController],
   providers: [AppService, NotificationsService],
 })
-export class AppModule {}
+export class AppModule { }

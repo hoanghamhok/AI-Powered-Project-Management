@@ -1,0 +1,12 @@
+{
+    "routes": {
+        "chat-free": {
+            "strategy": "fallback",
+            "models": [
+                "gemini-2.0-flash",
+                "openrouter/deepseek/deepseek-chat-v3-0324:free",
+                "openrouter/qwen/qwen3-32b:free"
+            ]
+        }
+    }
+}

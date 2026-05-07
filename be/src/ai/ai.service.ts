@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { GeminiService } from 'src/gemini/gemini.service';
+import { LlmService } from 'src/llm/llm.service';
 
 @Injectable()
 export class AiService {
   constructor(
     private prisma: PrismaService,
-    private gemini: GeminiService,
-  ) {}
+    private llm: LlmService,
+  ) { }
 
   async generateProjectSummary(projectId: string) {
     const project = await this.prisma.project.findUnique({
@@ -77,7 +77,7 @@ ${JSON.stringify(projectData, null, 2)}
 Chỉ trả về văn bản tóm tắt, không định dạng thêm, không dùng gạch đầu dòng.
 `;
 
-    const summary = await this.gemini.generate(prompt);
+    const summary = await this.llm.generate(prompt);
 
     // Save summary to database
     await this.prisma.project.update({
@@ -164,6 +164,6 @@ Chỉ trả về văn bản tóm tắt, không định dạng thêm, không dùn
   `;
 
     // gọi AI
-    return this.gemini.generate(prompt);
+    return this.llm.generate(prompt);
   }
 }
