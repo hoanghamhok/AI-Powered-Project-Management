@@ -12,27 +12,27 @@ export class LlmService {
     });
   }
 
-  async generate(prompt: string) {
+  async generate(input: string | { system: string; prompt: string }): Promise<string> {
+    const systemContent = typeof input === 'string' ? undefined : input.system;
+    const userContent = typeof input === 'string' ? input : input.prompt;
+
+    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+      ...(systemContent ? [{ role: 'system' as const, content: systemContent }] : []),
+      { role: 'user' as const, content: userContent },
+    ];
+
     try {
-        const response = await this.client.chat.completions.create({
-          model: 'chat-free',
-          messages: [
-            {
-              role: 'user',
-              content: prompt,
-            },
-          ],
-        });
+      const response = await this.client.chat.completions.create({
+        model: process.env.LLM_MODEL || 'chat-free',
+        messages,
+        temperature: 0.2,
+        max_tokens: 2048,
+      });
 
-        return response.choices[0]?.message?.content || '';
-      } catch (error: any) {
-        console.error(error);
-
-        if (error?.status === 429) {
-          return 'AI đang quá tải, vui lòng thử lại sau vài giây.';
-        }
-
-        return 'AI hiện không khả dụng.';
-      }
+      return response.choices[0]?.message?.content?.trim() || '';
+    } catch (error: any) {
+      if (error?.status === 429) return 'AI đang quá tải, vui lòng thử lại sau.';
+      return 'AI hiện không khả dụng.';
+    }
   }
 }

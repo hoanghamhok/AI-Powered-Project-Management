@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { useAI } from "../hook/useAI";
 import { useAuth } from "../../auth/hooks/useAuth";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 interface Message {
   role: "user" | "ai";
   content: string;
@@ -134,7 +137,7 @@ const ChatBox = ({ projectId }: { projectId: string }) => {
           position: absolute;
           bottom: 68px;
           right: 0;
-          width: 360px;
+          width: 400px;
           background: #fff;
           border-radius: 20px;
           box-shadow: 0 8px 48px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.08);
@@ -204,8 +207,8 @@ const ChatBox = ({ projectId }: { projectId: string }) => {
           display: flex;
           flex-direction: column;
           gap: 10px;
-          min-height: 280px;
-          max-height: 320px;
+          min-height: 350px;
+          max-height: 450px;
           background: #fafafa;
           scrollbar-width: thin;
           scrollbar-color: #e0e0e0 transparent;
@@ -279,12 +282,13 @@ const ChatBox = ({ projectId }: { projectId: string }) => {
           color: #555;
         }
         .bubble-text {
-          max-width: 78%;
-          padding: 10px 13px;
+          max-width: 85%;
+          padding: 10px 14px;
           border-radius: 14px;
           font-size: 13.5px;
-          line-height: 1.55;
+          line-height: 1.6;
           color: #1a1a1a;
+          word-break: break-word;
         }
         .chat-bubble.ai .bubble-text {
           background: #fff;
@@ -296,6 +300,45 @@ const ChatBox = ({ projectId }: { projectId: string }) => {
           background: #0f0f0f;
           color: #fff;
           border-bottom-right-radius: 4px;
+        }
+
+        /* Markdown Styling */
+        .markdown-content p { margin-bottom: 8px; }
+        .markdown-content p:last-child { margin-bottom: 0; }
+        .markdown-content ul, .markdown-content ol { margin: 8px 0; padding-left: 18px; }
+        .markdown-content li { margin-bottom: 4px; }
+        .markdown-content code {
+          background: #f1f1f1;
+          padding: 2px 4px;
+          border-radius: 4px;
+          font-family: 'Space Mono', monospace;
+          font-size: 0.9em;
+        }
+        .chat-bubble.user .markdown-content code { background: #333; color: #fff; }
+        .markdown-content pre {
+          background: #f8f8f8;
+          padding: 10px;
+          border-radius: 8px;
+          margin: 8px 0;
+          overflow-x: auto;
+        }
+        .markdown-content table {
+          border-collapse: collapse;
+          width: 100%;
+          margin: 8px 0;
+          font-size: 12px;
+        }
+        .markdown-content th, .markdown-content td {
+          border: 1px solid #eee;
+          padding: 6px 8px;
+          text-align: left;
+        }
+        .markdown-content th { background: #f9f9f9; font-weight: 600; }
+        .markdown-content blockquote {
+          border-left: 3px solid #ddd;
+          padding-left: 10px;
+          color: #666;
+          margin: 8px 0;
         }
 
         /* Typing indicator */
@@ -481,7 +524,13 @@ const ChatBox = ({ projectId }: { projectId: string }) => {
                         <div className={`bubble-avatar ${msg.role === "ai" ? "ai-avatar" : "user-avatar"}`}>
                           {msg.role === "ai" ? "AI" : "U"}
                         </div>
-                        <div className="bubble-text">{msg.content}</div>
+                        <div className="bubble-text">
+                          <div className="markdown-content">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {msg.content}
+                            </ReactMarkdown>
+                          </div>
+                        </div>
                       </div>
                     ))}
 

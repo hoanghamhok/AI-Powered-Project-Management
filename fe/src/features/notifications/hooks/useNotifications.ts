@@ -30,9 +30,17 @@ export const useNotifications = () =>{
         }
     })
 
+    const clearAllNotifications = useMutation({
+        mutationFn:() => {
+            return notificationsAPI.clearAllNotifications()},
+        onSuccess:()=>{
+            queryClient.invalidateQueries({queryKey:["notifications"]})
+        }
+    })
+
     return {
     ...query,
-    markRead,deleteNotification
+    markRead,deleteNotification,clearAllNotifications
   };
     
 }

@@ -12,6 +12,7 @@ import type { Task } from "../../tasks/types";
 import { TaskDetailModal } from "../../tasks/components/TaskDetailModal";
 import { FiLogOut } from "react-icons/fi";
 import { FaUser, FaUserShield } from "react-icons/fa";
+import { useConfirm } from "../../shared/components/ConfirmContext";
 
 interface NavbarProps {
   onToggleSidebar?: () => void;
@@ -20,7 +21,8 @@ interface NavbarProps {
 const Navbar = ({ onToggleSidebar }: NavbarProps) => {
   const { user, logout, loading } = useAuth();
   const navigate = useNavigate();
-  const { data: notifications = [], markRead } = useNotifications();
+  const { data: notifications = [], markRead, clearAllNotifications } = useNotifications();
+  const { openConfirm } = useConfirm();
   const { acceptMutation, rejectMutation } = useInvite();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNoti, setShowNoti] = useState(false);
@@ -126,14 +128,32 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
                       </span>
                     )}
                   </h3>
-                  {/* {unread > 0 && (
-                    <button
-                      onClick={() => markRead.mutate(notifications.filter(n => !n.read).map(n => n.id))}
-                      className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
-                    >
-                      Đánh dấu đã đọc
-                    </button>
-                  )} */}
+                  <div className="flex gap-2">
+                    {unread > 0 && (
+                      <button
+                        onClick={() => {
+                          // Logic đánh dấu tất cả đã đọc có thể thêm sau nếu cần
+                        }}
+                        className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                      >
+                        {/* Đánh dấu đã đọc */}
+                      </button>
+                    )}
+                    {notifications.length > 0 && (
+                      <button
+                        onClick={() => {
+                          openConfirm({
+                            title: "Xóa tất cả thông báo",
+                            message: "Bạn có chắc chắn muốn xóa tất cả thông báo không?",
+                            onConfirm: () => clearAllNotifications.mutate(),
+                          });
+                        }}
+                        className="text-xs text-red-500 hover:underline"
+                      >
+                        Xóa tất cả
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Danh sách thông báo */}

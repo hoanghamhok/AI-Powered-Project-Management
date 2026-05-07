@@ -27,4 +27,11 @@ export class NotificationsController {
     async deleteNoti(@Request() req,@Param('notiId') notiId: string) {
         return await this.notificationsService.deleteNoti(notiId,req.user.userId);
     }
+
+    @Delete('clear-all')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    async deleteAll(@Request() req) {
+        return await this.notificationsService.deleteAllNotifications(req.user.userId);
+    }
 }
