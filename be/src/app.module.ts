@@ -11,8 +11,6 @@ import { InvitesModule } from './invites/invites.module';
 import { ColumnsModule } from './columns/columns.module';
 import { ProjectmembersModule } from './projectmembers/projectmembers.module';
 import { MailModule } from './mail/mail.module';
-import { NotificationsController } from './notifications/notifications.controller';
-import { NotificationsService } from './notifications/notifications.service';
 import { NotificationsModule } from './notifications/notifications.module';
 import { CommentsModule } from './comment/comment.module';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -53,7 +51,6 @@ import { LlmModule } from './llm/llm.module';
     TaskRemindModule,
     PaymentModule
   ],
-  controllers: [NotificationsController],
-  providers: [AppService, NotificationsService],
+  providers: [AppService],
 })
 export class AppModule { }

@@ -1,5 +1,5 @@
 import { SystemRole } from '@prisma/client';
-import { Injectable, ConflictException, Delete, BadRequestException } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
@@ -65,11 +65,20 @@ export class UsersService {
         });
     }
 
-    async findAllUsers() {
+    async findAllUsers(currentRole?: SystemRole) {
+        if (currentRole !== SystemRole.SUPER_ADMIN) {
+            throw new ForbiddenException('Only SUPER_ADMIN can view all users');
+        }
         return this.prisma.user.findMany({ select: { id: true, email: true, role: true, createdAt: true, username: true } });
     }
 
-    async updateUserRole(id: string, role: SystemRole) {
+    async updateUserRole(id: string, role: SystemRole, currentUserId: string, currentRole?: SystemRole) {
+        if (currentRole !== SystemRole.SUPER_ADMIN) {
+            throw new ForbiddenException('Only SUPER_ADMIN can update user roles');
+        }
+        if (id === currentUserId) {
+            throw new ForbiddenException('SUPER_ADMIN cannot change their own role');
+        }
         return this.prisma.user.update({
             where: { id },
             data: { role }

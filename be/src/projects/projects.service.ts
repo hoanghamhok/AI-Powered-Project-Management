@@ -1,9 +1,7 @@
 import { ProjectRole, SystemRole } from '@prisma/client';
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { TasksService } from 'src/tasks/tasks.service';
 import { UsersService } from 'src/user/user.service';
-import { AuthService } from 'src/auth/auth.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 
@@ -11,25 +9,33 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 export class ProjectsService {
     constructor(
         private prisma: PrismaService,
-        private tasksService: TasksService,
         private usersService: UsersService,
-        private authService: AuthService,
     ) { }
 
-    async getProjectByID(id: string) {
+    async getProjectByID(id: string, currentUserId?: string, role?: SystemRole) {
         const project = await this.prisma.project.findUnique({ where: { id } });
         if (!project) {
             throw new NotFoundException();
+        }
+        if (currentUserId && role !== SystemRole.SUPER_ADMIN) {
+            const member = await this.prisma.projectMember.findUnique({
+                where: { projectId_userId: { projectId: id, userId: currentUserId } },
+                select: { id: true },
+            });
+            if (!member) {
+                throw new ForbiddenException('You are not a member of this project');
+            }
         }
         return project;
     }
 
     //Chưa làm thêm super admin cũng thêm được
-    async createProject(data: CreateProjectDto) {
-        if (!data || !data.ownerId) {
-            throw new BadRequestException('Missing project data or ownerId');
+    async createProject(data: CreateProjectDto, currentUserId: string, role?: SystemRole) {
+        if (!data) {
+            throw new BadRequestException('Missing project data');
         }
-        const owner = await this.usersService.getUserById(data.ownerId);
+        const ownerId = role === SystemRole.SUPER_ADMIN && data.ownerId ? data.ownerId : currentUserId;
+        const owner = await this.usersService.getUserById(ownerId);
         if (!owner) {
             throw new NotFoundException('User not found');
         }
@@ -73,7 +79,10 @@ export class ProjectsService {
         });
     }
 
-    async getAllProjects() {
+    async getAllProjects(role?: SystemRole) {
+        if (role !== SystemRole.SUPER_ADMIN) {
+            throw new ForbiddenException('Only SUPER_ADMIN can view all projects');
+        }
         return this.prisma.project.findMany({
             include: { owner: true, members: true },
         });

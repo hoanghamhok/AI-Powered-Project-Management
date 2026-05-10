@@ -24,29 +24,29 @@ export class ProjectsController {
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
     @Get('all')
-    getAllProjects() {
-        return this.projectsService.getAllProjects();
+    getAllProjects(@Request() req) {
+        return this.projectsService.getAllProjects(req.user.role);
     }
 
 
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
     @Get(':id')
-    async getProjectByID(@Param('id') id: string) {
-        return this.projectsService.getProjectByID(id);
+    async getProjectByID(@Param('id') id: string, @Request() req) {
+        return this.projectsService.getProjectByID(id, req.user.userId, req.user.role);
     }
 
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
     @Post('')
-    async createProject(@Body() data: CreateProjectDto) {
-        return this.projectsService.createProject(data);
+    async createProject(@Body() data: CreateProjectDto, @Request() req) {
+        return this.projectsService.createProject(data, req.user.userId, req.user.role);
     }
 
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
     @Patch(':id/update')
-    async updateProject(@Param('projectId') projectId: string, @Request() req, @Body() dto: UpdateProjectDto) {
+    async updateProject(@Param('id') projectId: string, @Request() req, @Body() dto: UpdateProjectDto) {
         return this.projectsService.updateProject(projectId, req.user.userId, dto)
     }
 

@@ -4,12 +4,10 @@ import { ProjectsService } from './projects.service';
 import { ProjectsController } from './projects.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UsersModule } from '../user/user.module';
-import { AuthModule } from '../auth/auth.module';
-import { TasksModule } from '../tasks/tasks.module';
 import { AiModule } from '../ai/ai.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, AuthModule, TasksModule, AiModule],
+  imports: [PrismaModule, UsersModule, AiModule],
   controllers: [ProjectsController],
   providers: [ProjectsService],
   exports:[ProjectsService]

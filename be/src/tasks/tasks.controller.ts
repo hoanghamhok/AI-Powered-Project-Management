@@ -24,8 +24,10 @@ export class TasksController {
   constructor(private tasksService: TasksService,private riskPredictionService: RiskPredictionService) {}
 
   @Get()
-  async getAllTasks() {
-    return this.tasksService.getAll();
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async getAllTasks(@Request() req) {
+    return this.tasksService.getAll(req.user.role);
   }
 
   @Get('my-tasks')
@@ -36,32 +38,38 @@ export class TasksController {
   }
 
   @Get('project/:projectId')
-  async getByProjectID(@Param('projectId') projectId: string) {
-    return this.tasksService.getTasksByProjectId(projectId);
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async getByProjectID(@Param('projectId') projectId: string, @Request() req) {
+    return this.tasksService.getTasksByProjectId(projectId, req.user.userId, req.user.role);
   }
 
   @Get('detail/:id')
-  async getByID(@Param('id') id: string) {
-    return this.tasksService.getTaskByID(id);
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async getByID(@Param('id') id: string, @Request() req) {
+    return this.tasksService.getTaskByID(id, req.user.userId, req.user.role);
   }
 
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   create(@Body() createTaskDto: CreateTaskDto, @Request() req) {
-    return this.tasksService.create(createTaskDto, req.user.userId);
+    return this.tasksService.create(createTaskDto, req.user.userId, req.user.role);
   }
 
   @Post('bulk')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   bulkCreate(@Body() createManyTasksDto: CreateManyTasksDto, @Request() req) {
-    return this.tasksService.bulkCreate(createManyTasksDto, req.user.userId);
+    return this.tasksService.bulkCreate(createManyTasksDto, req.user.userId, req.user.role);
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    const updatedTask = await this.tasksService.update(id, updateTaskDto);
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto, @Request() req) {
+    const updatedTask = await this.tasksService.update(id, updateTaskDto, req.user.userId, req.user.role);
     const newRiskScore = await this.riskPredictionService.getRiskScore(id);
     return {
       ...updatedTask,
@@ -87,7 +95,9 @@ export class TasksController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tasksService.remove(id);
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  remove(@Param('id') id: string, @Request() req) {
+    return this.tasksService.remove(id, req.user.userId, req.user.role);
   }
 }

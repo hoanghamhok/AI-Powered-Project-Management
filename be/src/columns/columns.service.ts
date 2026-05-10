@@ -1,4 +1,5 @@
-import {Injectable,NotFoundException,ConflictException} from "@nestjs/common";
+import {Injectable,NotFoundException,ConflictException,ForbiddenException} from "@nestjs/common";
+import { SystemRole } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreateColumnDto } from "./dto/create-column.dto";
 import { UpdateColumnDto } from "./dto/update-column.dto";
@@ -7,7 +8,23 @@ import { UpdateColumnDto } from "./dto/update-column.dto";
 export class ColumnsService {
   constructor(private prisma: PrismaService) {}
 
-  async getAll() {
+  private async assertProjectAccess(projectId: string, userId: string, role?: string) {
+    if (role === SystemRole.SUPER_ADMIN) {
+      return;
+    }
+    const member = await this.prisma.projectMember.findUnique({
+      where: { projectId_userId: { projectId, userId } },
+      select: { id: true },
+    });
+    if (!member) {
+      throw new ForbiddenException("You are not a member of this project");
+    }
+  }
+
+  async getAll(role?: string) {
+    if (role !== SystemRole.SUPER_ADMIN) {
+      throw new ForbiddenException("Only SUPER_ADMIN can view all columns");
+    }
     return this.prisma.column.findMany({
         orderBy: [
           { position: 'asc' },
@@ -15,7 +32,10 @@ export class ColumnsService {
       });
     }
 
-  async getByProject(projectId: string) {
+  async getByProject(projectId: string, userId?: string, role?: string) {
+    if (userId) {
+      await this.assertProjectAccess(projectId, userId, role);
+    }
     return this.prisma.column.findMany({
       where: {
         projectId,
@@ -26,11 +46,12 @@ export class ColumnsService {
     });
   }
 
-  async create(dto: CreateColumnDto) {
+  async create(dto: CreateColumnDto, userId: string, role?: string) {
     const project = await this.prisma.project.findUnique({
       where: { id: dto.projectId },
     });
     if (!project) throw new NotFoundException("Project not found");
+    await this.assertProjectAccess(dto.projectId, userId, role);
     const last = await this.prisma.column.findFirst({
       where: { projectId: dto.projectId },
       orderBy: { position: "desc" },
@@ -48,11 +69,14 @@ export class ColumnsService {
     });
   }
 
-  async update(id: string, dto: UpdateColumnDto) {
+  async update(id: string, dto: UpdateColumnDto, userId?: string, role?: string) {
     const column = await this.prisma.column.findUnique({
       where: { id },
     });
     if (!column) throw new NotFoundException("Column not found");
+    if (userId) {
+      await this.assertProjectAccess(column.projectId, userId, role);
+    }
 
     return this.prisma.column.update({
       where: { id },
@@ -63,7 +87,12 @@ export class ColumnsService {
     });
   }
 
-  async move(columnId: string, beforeColumnId?: string, afterColumnId?: string) {
+  async move(columnId: string, beforeColumnId?: string, afterColumnId?: string, userId?: string, role?: string) {
+    const column = await this.prisma.column.findUnique({ where: { id: columnId } });
+    if (!column) throw new NotFoundException("Column not found");
+    if (userId) {
+      await this.assertProjectAccess(column.projectId, userId, role);
+    }
     let newPosition: number;
 
     if (beforeColumnId && afterColumnId) {
@@ -71,25 +100,27 @@ export class ColumnsService {
         this.prisma.column.findUnique({ where: { id: beforeColumnId } }),
         this.prisma.column.findUnique({ where: { id: afterColumnId } }),
       ]);
-      if (!before || !after) throw new NotFoundException("Invalid column reference");
+      if (!before || !after || before.projectId !== column.projectId || after.projectId !== column.projectId) {
+        throw new NotFoundException("Invalid column reference");
+      }
 
       newPosition = (before.position + after.position) / 2;
 
     } else if (beforeColumnId) {
       const before = await this.prisma.column.findUnique({ where: { id: beforeColumnId } });
-      if (!before) throw new NotFoundException("Invalid column reference");
+      if (!before || before.projectId !== column.projectId) throw new NotFoundException("Invalid column reference");
 
       newPosition = before.position + 1000;
 
     } else if (afterColumnId) {
       const after = await this.prisma.column.findUnique({ where: { id: afterColumnId } });
-      if (!after) throw new NotFoundException("Invalid column reference");
+      if (!after || after.projectId !== column.projectId) throw new NotFoundException("Invalid column reference");
 
       newPosition = after.position / 2; // ✅ tránh âm
 
     } else {
       const last = await this.prisma.column.findFirst({
-        where: { closed: false },
+        where: { projectId: column.projectId, closed: false },
         orderBy: { position: "desc" },
       });
       newPosition = last ? last.position + 1000 : 1000;
@@ -101,11 +132,14 @@ export class ColumnsService {
     });
   }
 
-  async close(id: string) {
+  async close(id: string, userId?: string, role?: string) {
     const column = await this.prisma.column.findUnique({
       where: { id },
     });
     if (!column) throw new NotFoundException("Column not found");
+    if (userId) {
+      await this.assertProjectAccess(column.projectId, userId, role);
+    }
 
     const existingDoneColumn = await this.prisma.column.findFirst({
       where: {
@@ -132,8 +166,11 @@ export class ColumnsService {
         return column;
   }
 
-  async remove(id:string){
-    await this.getColumnByID(id)
+  async remove(id:string, userId?: string, role?: string){
+    const column = await this.getColumnByID(id)
+    if (userId) {
+      await this.assertProjectAccess(column.projectId, userId, role);
+    }
     return this.prisma.column.delete({
       where:{id}
     })

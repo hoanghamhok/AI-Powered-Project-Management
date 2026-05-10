@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards,Request,Response, Delete, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards,Request,Response, Delete, Param, Headers } from '@nestjs/common';
 import { ApiTags,ApiBody,ApiOkResponse,ApiCreatedResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -34,8 +34,14 @@ export class AuthController {
 
   @Post('register-admin')
   @ApiCreatedResponse({type: AuthResponseDto})
-  async registerAdmin(@Body()  registerDto: RegisterDto) {
-    return this.authService.registerAdmin(registerDto.email, registerDto.password,registerDto.username,registerDto.fullname);
+  async registerAdmin(@Body()  registerDto: RegisterDto, @Headers('authorization') authorization?: string) {
+    return this.authService.registerAdmin(
+      registerDto.email,
+      registerDto.password,
+      registerDto.username,
+      registerDto.fullname,
+      authorization,
+    );
   }
 
   @Post('forgot-password')
@@ -71,9 +77,8 @@ export class AuthController {
   async googleCallback(@Request() req, @Response() res) {
     const { accessToken } = await this.authService.loginWithGoogle(req.user);
 
-    res.redirect(
-      `http://localhost:5173/auth/google/callback?token=${accessToken}`,
-    );
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(`${frontendUrl}/auth/google/callback?token=${accessToken}`);
   }
 
   @Get('google')

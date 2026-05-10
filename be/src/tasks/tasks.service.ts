@@ -1,4 +1,5 @@
-import { Injectable,NotFoundException,ConflictException, BadRequestException } from "@nestjs/common";
+import { Injectable,NotFoundException,ConflictException, BadRequestException, ForbiddenException } from "@nestjs/common";
+import { SystemRole } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreateTaskDto } from "./dto/create-task.dto";
 import { UpdateTaskDto } from "./dto/update-task.dto";
@@ -15,8 +16,21 @@ export class TasksService{
                 private activityLogService:ActivityLogService,
                 private taskDependencyService: TaskDependencyService,
                 private riskPredictionService: RiskPredictionService){}
+
+    private async assertProjectAccess(projectId: string, userId: string, role?: string) {
+        if (role === SystemRole.SUPER_ADMIN) {
+            return;
+        }
+        const member = await this.prisma.projectMember.findUnique({
+            where: { projectId_userId: { projectId, userId } },
+            select: { id: true },
+        });
+        if (!member) {
+            throw new ForbiddenException('You are not a member of this project');
+        }
+    }
     
-    async getTaskByID(id:string){
+    async getTaskByID(id:string, userId?: string, role?: string){
         const task = await this.prisma.task.findUnique({
             where:{id},
             include: {
@@ -41,6 +55,9 @@ export class TasksService{
         if(!task){
             throw new NotFoundException();
         }
+        if (userId) {
+            await this.assertProjectAccess(task.projectId, userId, role);
+        }
 
         const unresolvedDependencies = task.dependencies.filter(
             (d) => d.dependsOn.completedAt === null,
@@ -57,11 +74,20 @@ export class TasksService{
         };
     }
     
-    async create(createTaskDto:CreateTaskDto,userId:string){
+    async create(createTaskDto:CreateTaskDto,userId:string, role?: string){
         
         const project = await this.prisma.project.findUnique({ where: { id: createTaskDto.projectId } });
         if (!project) {
             throw new NotFoundException('Project not found');
+        }
+        await this.assertProjectAccess(createTaskDto.projectId, userId, role);
+
+        const column = await this.prisma.column.findFirst({
+            where: { id: createTaskDto.columnId, projectId: createTaskDto.projectId },
+            select: { id: true },
+        });
+        if (!column) {
+            throw new BadRequestException('Column does not belong to the project');
         }
         const members = await this.prisma.projectMember.findMany({
         where: {projectId: createTaskDto.projectId,userId: {in: createTaskDto.assigneeIds}},
@@ -120,7 +146,7 @@ export class TasksService{
         
     }
 
-    async bulkCreate(createManyTasksDto: CreateManyTasksDto, userId: string) {
+    async bulkCreate(createManyTasksDto: CreateManyTasksDto, userId: string, role?: string) {
         const { tasks } = createManyTasksDto;
 
         if (!tasks || tasks.length === 0) {
@@ -128,12 +154,24 @@ export class TasksService{
         }
 
         const projectId = tasks[0].projectId;
+        if (tasks.some(task => task.projectId !== projectId)) {
+            throw new BadRequestException('Bulk create only supports one project at a time');
+        }
 
         // 1. Check project
         const project = await this.prisma.project.findUnique({
             where: { id: projectId },
         });
         if (!project) throw new NotFoundException('Project not found');
+        await this.assertProjectAccess(projectId, userId, role);
+
+        const columnIds = [...new Set(tasks.map(task => task.columnId))];
+        const validColumnCount = await this.prisma.column.count({
+            where: { projectId, id: { in: columnIds } },
+        });
+        if (validColumnCount !== columnIds.length) {
+            throw new BadRequestException('One or more columns do not belong to the project');
+        }
 
         // 2. Gom tất cả assigneeIds
         const allAssigneeIds = [
@@ -196,10 +234,19 @@ export class TasksService{
         return createdTasks;
         }
     
-    async update(id: string, dto: UpdateTaskDto) {
-        const task = await this.getTaskByID(id);
+    async update(id: string, dto: UpdateTaskDto, userId?: string, role?: string) {
+        const task = await this.getTaskByID(id, userId, role);
         if (task.blocked) {
             throw new BadRequestException('Cannot update a blocked task');
+        }
+        if (dto.assigneeIds) {
+            const members = await this.prisma.projectMember.findMany({
+                where: { projectId: task.projectId, userId: { in: dto.assigneeIds } },
+                select: { userId: true },
+            });
+            if (members.length !== dto.assigneeIds.length) {
+                throw new ConflictException('One or more assignees are not members of the project');
+            }
         }
         return this.prisma.task.update({
             where: { id },
@@ -227,14 +274,17 @@ export class TasksService{
         });
     }
     
-    async remove(id:string){
-        await this.getTaskByID(id);
+    async remove(id:string, userId?: string, role?: string){
+        await this.getTaskByID(id, userId, role);
         return this.prisma.task.delete({
             where:{id},
         });
     }
     
-    async getAll() {
+    async getAll(role?: string) {
+        if (role !== SystemRole.SUPER_ADMIN) {
+            throw new ForbiddenException('Only SUPER_ADMIN can view all tasks');
+        }
         return this.prisma.task.findMany({
             orderBy: [
             { projectId: 'asc' },
@@ -284,10 +334,14 @@ export class TasksService{
             if (!task) {
             throw new Error("Task not found");
             }
+            await this.assertProjectAccess(task.projectId, userId);
 
             const targetColumn = await tx.column.findUnique({
             where: { id: columnId },
             });
+            if (!targetColumn || targetColumn.projectId !== task.projectId) {
+                throw new BadRequestException('Target column does not belong to the task project');
+            }
 
             let newPosition: number;
 
@@ -495,7 +549,10 @@ export class TasksService{
     }
 
 
-    async getTasksByProjectId(projectId: string) {
+    async getTasksByProjectId(projectId: string, userId?: string, role?: string) {
+        if (userId) {
+            await this.assertProjectAccess(projectId, userId, role);
+        }
         const tasks = await this.prisma.task.findMany({
             where: { projectId },
             include: {

@@ -21,8 +21,8 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Get('')
-  async getAllUsers() {
-    return this.usersService.findAllUsers();
+  async getAllUsers(@Request() req) {
+    return this.usersService.findAllUsers(req.user.role);
   }
 
   @Get(':id')
@@ -36,8 +36,8 @@ export class UsersController {
   @Patch(':id/role')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  async updateUserRole(@Param('id') id: string, @Body('role') role: any) { // Using any for simplicity, but should be SystemRole
-    return this.usersService.updateUserRole(id, role);
+  async updateUserRole(@Param('id') id: string, @Body('role') role: any, @Request() req) { // Using any for simplicity, but should be SystemRole
+    return this.usersService.updateUserRole(id, role, req.user.userId, req.user.role);
   }
 
   @Post('me/avatar')

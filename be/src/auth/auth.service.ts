@@ -49,7 +49,30 @@ export class AuthService {
         return { user: publicUser, accessToken };
     }
 
-    async registerAdmin(email: string, password: string,username:string,fullname:string) {
+    async registerAdmin(email: string, password: string,username:string,fullname:string, authorization?: string) {
+        const adminCount = await this.prisma.user.count({
+            where: { role: SystemRole.SUPER_ADMIN },
+        });
+
+        if (adminCount > 0) {
+            const token = authorization?.startsWith('Bearer ')
+                ? authorization.slice('Bearer '.length)
+                : undefined;
+
+            if (!token) {
+                throw new ForbiddenException('Only SUPER_ADMIN can create admins');
+            }
+
+            try {
+                const payload = await this.jwtService.verifyAsync<{ sub: string; role: SystemRole }>(token);
+                if (payload.role !== SystemRole.SUPER_ADMIN) {
+                    throw new ForbiddenException('Only SUPER_ADMIN can create admins');
+                }
+            } catch {
+                throw new ForbiddenException('Only SUPER_ADMIN can create admins');
+            }
+        }
+
         const user = await this.usersService.createAdmin(email, password,username,fullname);
         const accessToken = await this.jwtService.signAsync({
             sub: user.id,
