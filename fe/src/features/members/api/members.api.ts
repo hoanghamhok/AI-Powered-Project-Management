@@ -11,6 +11,5 @@ export const leaveProject = (projectId: string) =>
   api.post(`/projectmembers/${projectId}/leave`);
 
 export const setRoleMember = (projectId:string,targetUserId:string,role: ProjectRole) => {
-  console.log("PATCH ROLE", projectId, targetUserId, role);
-  api.patch(`/projectmembers/${projectId}/members/${targetUserId}/role`,{role})
+  return api.patch(`/projectmembers/${projectId}/members/${targetUserId}/role`,{role})
 }

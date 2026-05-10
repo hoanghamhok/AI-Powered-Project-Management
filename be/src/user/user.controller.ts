@@ -4,6 +4,7 @@ import { UsersService } from './user.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ImageUploadInterceptor } from '../cloudinary/image-upload.interceptor';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import {Multer} from 'multer';
 
 @ApiTags('Users')
 @Controller('users')

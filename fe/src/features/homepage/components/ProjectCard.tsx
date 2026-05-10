@@ -21,7 +21,9 @@ interface ProjectCardProps {
 export function ProjectCard({ item }: ProjectCardProps) {
   const { project, role } = item;
 
-  const progress = Math.floor(Math.random() * 100);
+  const progress = project.id
+    .split("")
+    .reduce((sum, char) => sum + char.charCodeAt(0), 0) % 101;
 
   const gradients = [
     "from-indigo-500 to-indigo-600",
