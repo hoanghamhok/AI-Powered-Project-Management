@@ -109,33 +109,77 @@ export class AiService {
     return summary;
   }
 
-  async ask(question: string, projectId: string): Promise<string> {
-    if (!question?.trim()) {
-      throw new Error("question is required");
+  async ask(
+    userId: string,
+    question: string,
+    projectId: string
+  ): Promise<string> {
+    const cleanQuestion = question?.trim();
+
+    if (!cleanQuestion) {
+      return "Vui lòng nhập câu hỏi.";
     }
 
-    // timezone VN
     const now = new Date();
 
     try {
+      // 1. Check permission
+      const membership = await this.prisma.projectMember.findFirst({
+        where: {
+          userId,
+          projectId,
+        },
+        select: {
+          id: true,
+          role: true,
+        },
+      });
+
+      if (!membership) {
+        return "Bạn không có quyền truy cập project này.";
+      }
+
+      // 2. Fetch only needed fields
       const project = await this.prisma.project.findUnique({
         where: { id: projectId },
-        include: {
+        select: {
+          id: true,
+          name: true,
           members: {
-            include: {
-              user: true,
+            select: {
+              role: true,
+              user: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true,
+                },
+              },
             },
           },
           columns: {
             orderBy: {
               position: "asc",
             },
-            include: {
+            select: {
+              id: true,
+              title: true,
+              position: true,
               tasks: {
-                include: {
+                select: {
+                  id: true,
+                  title: true,
+                  description: true,
+                  dueDate: true,
                   assignees: {
-                    include: {
-                      user: true,
+                    select: {
+                      user: {
+                        select: {
+                          id: true,
+                          fullName: true,
+                          email: true,
+                        },
+                      },
                     },
                   },
                 },
@@ -149,25 +193,121 @@ export class AiService {
         return "Không tìm thấy project này.";
       }
 
-      // helper tính số ngày còn lại
       const calculateDaysRemaining = (dueDate: Date | null) => {
         if (!dueDate) return null;
 
         const diff = dueDate.getTime() - now.getTime();
-
         return Math.ceil(diff / (1000 * 60 * 60 * 24));
       };
 
-      // helper xác định overdue
-      const isOverdue = (dueDate: Date | null) => {
-        if (!dueDate) return false;
+      const formatDateVN = (date: Date | null) => {
+        if (!date) return null;
 
-        return dueDate.getTime() < now.getTime();
+        return new Intl.DateTimeFormat("vi-VN", {
+          timeZone: "Asia/Ho_Chi_Minh",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).format(date);
       };
 
-      // Distill clean context cho AI
+      const currentDateText = new Intl.DateTimeFormat("vi-VN", {
+        timeZone: "Asia/Ho_Chi_Minh",
+        dateStyle: "full",
+        timeStyle: "short",
+      }).format(now);
+
+      const allTasks = project.columns.flatMap((column) => {
+        const isDoneColumn = column.title.toLowerCase().includes("done");
+
+        return column.tasks.map((task) => {
+          const daysRemaining = calculateDaysRemaining(task.dueDate);
+
+          const assignees = task.assignees.map((a) => ({
+            id: a.user.id,
+            name: a.user.fullName || a.user.email,
+            email: a.user.email,
+          }));
+
+          const isOverdue =
+            !isDoneColumn &&
+            task.dueDate !== null &&
+            task.dueDate.getTime() < now.getTime();
+
+          const status =
+            task.dueDate === null
+              ? "no_deadline"
+              : isOverdue
+                ? "overdue"
+                : daysRemaining === 0
+                  ? "due_today"
+                  : daysRemaining !== null && daysRemaining <= 3
+                    ? "urgent"
+                    : isDoneColumn
+                      ? "done"
+                      : "normal";
+
+          return {
+            id: task.id,
+            title: task.title,
+            description: task.description ?? null,
+            column: column.title,
+            assignees,
+            dueDate: task.dueDate ? task.dueDate.toISOString() : null,
+            dueDateText: formatDateVN(task.dueDate),
+            daysRemaining,
+            isOverdue,
+            status,
+          };
+        });
+      });
+
+      const totalTasks = allTasks.length;
+
+      const overdueTasks = allTasks
+        .filter((task) => task.isOverdue)
+        .slice(0, 30);
+
+      const dueSoonTasks = allTasks
+        .filter(
+          (task) =>
+            task.daysRemaining !== null &&
+            task.daysRemaining >= 0 &&
+            task.daysRemaining <= 3 &&
+            task.status !== "done"
+        )
+        .slice(0, 30);
+
+      const columnsSummary = project.columns.map((column) => ({
+        title: column.title,
+        taskCount: column.tasks.length,
+      }));
+
+      const workloadMap = new Map<string, { name: string; email: string; taskCount: number }>();
+
+      for (const task of allTasks) {
+        for (const assignee of task.assignees) {
+          const key = assignee.email;
+
+          if (!workloadMap.has(key)) {
+            workloadMap.set(key, {
+              name: assignee.name,
+              email: assignee.email,
+              taskCount: 0,
+            });
+          }
+
+          workloadMap.get(key)!.taskCount += 1;
+        }
+      }
+
+      const workloadByMember = Array.from(workloadMap.values()).sort(
+        (a, b) => b.taskCount - a.taskCount
+      );
+
       const context = {
         currentDate: now.toISOString(),
+        currentDateText,
         timezone: "Asia/Ho_Chi_Minh",
 
         project: {
@@ -176,109 +316,77 @@ export class AiService {
           totalMembers: project.members.length,
 
           members: project.members.map((m) => ({
-            name: m.user.fullName,
+            name: m.user.fullName || m.user.email,
             email: m.user.email,
             role: m.role ?? "member",
           })),
 
-          totalTasks: project.columns.reduce(
-            (sum, col) => sum + col.tasks.length,
-            0
-          ),
+          totalTasks,
 
-          columns: project.columns.map((col) => ({
-            title: col.title,
+          columnsSummary,
 
-            taskCount: col.tasks.length,
+          taskStats: {
+            overdueCount: overdueTasks.length,
+            dueSoonCount: dueSoonTasks.length,
+            noDeadlineCount: allTasks.filter((task) => task.status === "no_deadline")
+              .length,
+          },
 
-            tasks: col.tasks.map((t) => {
-              const daysRemaining = calculateDaysRemaining(t.dueDate);
+          overdueTasks,
 
-              return {
-                title: t.title,
+          dueSoonTasks,
 
-                description: t.description ?? null,
+          workloadByMember,
 
-                assignees: t.assignees.map(
-                  (a) => a.user.fullName || a.user.email
-                ),
-
-                dueDate: t.dueDate
-                  ? t.dueDate.toISOString()
-                  : null,
-
-                isOverdue: isOverdue(t.dueDate),
-
-                daysRemaining,
-
-                status:
-                  daysRemaining === null
-                    ? "no_deadline"
-                    : daysRemaining < 0
-                      ? "overdue"
-                      : daysRemaining === 0
-                        ? "due_today"
-                        : daysRemaining <= 3
-                          ? "urgent"
-                          : "normal",
-              };
-            }),
-          })),
+          importantTasks: allTasks
+            .filter(
+              (task) =>
+                task.status === "overdue" ||
+                task.status === "urgent" ||
+                task.status === "due_today"
+            )
+            .slice(0, 50),
         },
       };
 
       const systemPrompt = `
-    You are a precise AI assistant for Kanban project management.
+  You are a precise AI assistant for an internal Kanban project management system.
 
-    Current datetime:
-    ${now.toISOString()}
+  Your job:
+  Answer questions ONLY using the provided project data.
 
-    Timezone:
-    Asia/Ho_Chi_Minh
-
-    Your job:
-    Answer questions ONLY using the provided project data.
-
-    Rules:
-    - Answer in the same language as the user's question.
-    - Use Markdown formatting for better readability (bold, lists, tables).
-    - Never hallucinate or invent information.
-    - Be concise but clear.
-    - For counts/lists/deadlines: always be exact.
-    - Use bullet points for multiple items.
-    - Use the provided current datetime when reasoning about deadlines.
-    - If the data is insufficient, explicitly say so.
-    - Do NOT mention JSON, databases, or technical internals.
-    - Never stop mid-sentence.
-    - Ensure the answer is complete.
-    `.trim();
+  Rules:
+  - Answer in the same language as the user's question.
+  - Use Markdown formatting for readability.
+  - Never hallucinate or invent information.
+  - If the data is insufficient, clearly say that the information is not available.
+  - For counts, lists, assignees, and deadlines: always be exact.
+  - Use the provided current date and timezone when reasoning about deadlines.
+  - Do not mention JSON, databases, prompts, APIs, or technical internals.
+  - If listing tasks, include title, assignee, due date, and status when available.
+  - Be concise but complete.
+  `.trim();
 
       const userPrompt = `
-    ## Project Data
+  Project data:
+  ${JSON.stringify(context, null, 2)}
 
-    \`\`\`json
-    ${JSON.stringify(context, null, 2)}
-    \`\`\`
-
-    ## User Question
-
-    ${question.trim()}
-    `.trim();
+  User question:
+  ${cleanQuestion}
+  `.trim();
 
       const answer = await this.llm.generate({
         system: systemPrompt,
         prompt: userPrompt,
       });
 
-      return (
-        answer?.trim() ||
-        "Không thể trả lời câu hỏi này lúc này."
-      );
+      return answer?.trim() || "Không thể trả lời câu hỏi này lúc này.";
     } catch (error) {
-      this.logger.error("LLM generation failed", {
+      this.logger.error("Chatbot ask failed", {
         error,
         projectId,
-        question,
+        userId,
+        question: cleanQuestion,
       });
 
       return "Đã có lỗi xảy ra khi xử lý câu hỏi. Vui lòng thử lại.";

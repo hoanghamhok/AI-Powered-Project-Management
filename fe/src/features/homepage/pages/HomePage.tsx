@@ -4,7 +4,7 @@ import HomeNavbar from "../components/HomeNavbar";
 import HomeSidebar from "../components/HomeSidebar";
 import { useProjectsByUser } from "../../projects/hooks/useProjectsByUser";
 import { useAuth } from "../../auth/hooks/useAuth";
-import { ProjectCard } from "../components/ProjectCard";
+import {ProjectCard} from "../../projects/components/ProjectCard"
 import { DashboardSidebar } from "../components/DashboardSidebar";
 import { useMyTasks } from "../../tasks/hooks/useMyTask";
 

@@ -47,7 +47,7 @@ export function TaskCard({ taskId, projectId }: TaskCardProps) {
 
   const getInitials = (m: any) =>
     m.user?.username?.[0].toUpperCase() || "?";
-  console.log(task);
+
   return (
     <>
       <div
