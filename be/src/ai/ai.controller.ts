@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, HttpCode } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, HttpCode, Request } from '@nestjs/common';
 import { AiService } from './ai.service';
 import { AskDto } from './dto/ask.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
@@ -15,7 +15,7 @@ export class AiController {
   @ApiOperation({ summary: 'Chat với trợ lý AI (Premium only)' })
   @Post('ask')
   @HttpCode(200)
-  async ask(@Body() body: AskDto) {
-    return this.ai.ask(body.question, body.projectId);
+  async ask(@Body() body: AskDto, @Request() req) {
+    return this.ai.ask(req.user.userId,body.question, body.projectId);
   }
 }
