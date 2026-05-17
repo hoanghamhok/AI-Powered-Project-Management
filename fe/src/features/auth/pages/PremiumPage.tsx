@@ -313,7 +313,7 @@ export const PremiumPage: React.FC = () => {
                       <div style={styles.copyRow}>
                         <div>
                           <p style={styles.copyLabel}>Số tiền</p>
-                          <p style={styles.copyVal}>2.000đ</p>
+                          <p style={styles.copyVal}>19.000đ</p>
                         </div>
                       </div>
 
