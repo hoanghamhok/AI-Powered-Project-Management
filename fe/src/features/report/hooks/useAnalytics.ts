@@ -53,10 +53,10 @@ export const useRecentActivity = (projectId: string, limit: number = 10) => {
 };
 
 // High risk tasks
-export const useHighRiskTasks = (projectId: string) => {
+export const useHighRiskTasks = (projectId: string, enabled: boolean = true) => {
   return useQuery<RiskTask[]>({
     queryKey: ["analytics", "high-risk-tasks", projectId],
     queryFn: () => fetchHighRiskTasks(projectId).then((res) => res.data),
-    enabled: !!projectId,
+    enabled: !!projectId && enabled,
   });
-};
+};

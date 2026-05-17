@@ -6,9 +6,10 @@ import { Icon } from "./Icon";
 interface RiskTasksTableProps {
   riskRows: RiskRowProps[];
   shadow: any;
+  isPremium: boolean;
 }
 
-export function RiskTasksTable({ riskRows, shadow }: RiskTasksTableProps) {
+export function RiskTasksTable({ riskRows, shadow, isPremium }: RiskTasksTableProps) {
   const [search, setSearch] = useState("");
   const [riskFilter, setRiskFilter] = useState<string | null>(null);
 
@@ -24,8 +25,43 @@ export function RiskTasksTable({ riskRows, shadow }: RiskTasksTableProps) {
   const riskLevels = [
     { label: "CRITICAL", color: "bg-red-500" },
     { label: "AT RISK", color: "bg-amber-500" },
-    { label: "LOW RISK", color: "bg-emerald-500" },
   ];
+
+  if (!isPremium) {
+    return (
+      <div
+        className="bg-white rounded-2xl border border-gray-100 overflow-hidden flex flex-col"
+        style={shadow}
+      >
+        <div className="px-6 py-5 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <h4 className="text-xs font-black uppercase tracking-[0.12em] text-gray-500">
+              At-Risk Tasks
+            </h4>
+            <span className="px-2.5 py-1 bg-amber-100 text-amber-700 text-[10px] font-black rounded-lg uppercase tracking-wide">
+              Premium
+            </span>
+          </div>
+        </div>
+
+        <div className="px-6 py-16 text-center">
+          <div className="mx-auto w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
+            <Icon name="lock" className="text-amber-500" size={24} />
+          </div>
+          <p className="mt-4 text-sm font-bold text-gray-900">Premium feature</p>
+          <p className="mt-2 text-xs text-gray-400 max-w-sm mx-auto">
+            Upgrade to Premium to view medium and high risk tasks in this project.
+          </p>
+          <button
+            onClick={() => (window.location.href = "/premium")}
+            className="mt-5 px-4 py-2 bg-gray-900 text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Upgrade
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -39,7 +75,7 @@ export function RiskTasksTable({ riskRows, shadow }: RiskTasksTableProps) {
               At-Risk Tasks
             </h4>
             <span className="px-2.5 py-1 bg-red-100 text-red-600 text-[10px] font-black rounded-lg uppercase tracking-wide">
-              {riskRows.length} {riskRows.length === 1 ? "Task" : "Tasks"}
+              {filteredRows.length} {filteredRows.length === 1 ? "Task" : "Tasks"}
             </span>
           </div>
           
@@ -68,7 +104,7 @@ export function RiskTasksTable({ riskRows, shadow }: RiskTasksTableProps) {
                 : "bg-gray-100 text-gray-500 hover:bg-gray-200"
             }`}
           >
-            All Levels
+            Medium & High
           </button>
           {riskLevels.map((level) => (
             <button

@@ -39,7 +39,7 @@ export class AnalyticsService {
     // Sort by risk score descending
     return tasksWithRisk
       .sort((a, b) => b.riskScore - a.riskScore)
-      .filter((t) => t.riskScore > 0.3); // Filter tasks with risk score above 0.3
+      .filter((t) => t.riskScore >= 0.4); // Only medium and high risk tasks
   }
 
 

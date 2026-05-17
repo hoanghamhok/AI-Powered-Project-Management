@@ -2,6 +2,7 @@ import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AnalyticsService } from './analytics.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
+import { PremiumGuard } from '../auth/guard/premium.guard';
 import { ProjectReportGuard } from './guards/project-report.guard';
 
 @ApiTags('Analytics')
@@ -29,6 +30,7 @@ export class AnalyticsController {
     return this.analyticsService.getTaskCompletionTrend(projectId, days);
   }
 
+  @UseGuards(PremiumGuard)
   @Get('projects/:projectId/risk-tasks')
   async getHighRiskTasks(@Param('projectId') projectId: string) {
     return this.analyticsService.getHighRiskTasks(projectId);

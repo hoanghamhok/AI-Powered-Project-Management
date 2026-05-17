@@ -62,7 +62,7 @@ export default function DashboardContent() {
   const { data: stats } = useProjectStats(selectedProjectId);
   const { data: memberPerformance = [] } = useMemberPerformance(selectedProjectId);
   const { data: trend = [] } = useTaskCompletionTrend(selectedProjectId, selectedDays);
-  const { data: highRiskTasks = [] } = useHighRiskTasks(selectedProjectId);
+  const { data: highRiskTasks = [] } = useHighRiskTasks(selectedProjectId, !!user?.isPremium);
 
   // ── Data Formatting ───────────────────────────────────────────────────────
   const lineData = trend.map((item) => ({
@@ -87,17 +87,17 @@ export default function DashboardContent() {
 
   const maxBar = Math.max(...barData.map((b) => b.completedTasks), 1);
 
-  const riskRows: RiskRowProps[] = highRiskTasks.map((task) => {
+  const riskRows: RiskRowProps[] = highRiskTasks.filter((task) => task.riskScore >= 0.4).map((task) => {
     const riskScore = task.riskScore;
     let statusLabel = "LOW RISK";
     let statusBg = "bg-emerald-100";
     let statusColor = "text-emerald-700";
 
-    if (riskScore > 0.7) {
+    if (riskScore >= 0.7) {
       statusLabel = "CRITICAL";
       statusBg = "bg-red-100";
       statusColor = "text-red-600";
-    } else if (riskScore > 0.4) {
+    } else if (riskScore >= 0.4) {
       statusLabel = "AT RISK";
       statusBg = "bg-amber-100";
       statusColor = "text-amber-700";
@@ -230,6 +230,7 @@ export default function DashboardContent() {
               <RiskTasksTable
                 riskRows={riskRows}
                 shadow={shadow}
+                isPremium={!!user?.isPremium}
               />
             </div>
 
