@@ -59,13 +59,10 @@ export class PaymentService {
     const sepayId = body.id;
     const amount = Number(body.transferAmount || body.amount_in || body.amount || 0);
 
-    // Combine all possible text sources to search for the TDL code
-    const searchText = `${body.content || ''} ${body.description || ''} ${body.code || ''}`;
-    const codeMatch = searchText.match(/TDL[A-Z0-9]+/i);
-    const code = codeMatch ? codeMatch[0].toUpperCase() : null;
+    const code = this.extractPaymentCode(body);
 
     if (!code) {
-      console.log('No TDL code found in search text:', searchText);
+      console.log('No TDL code found in webhook payload:', JSON.stringify(body));
       return { status: 'ignored', message: 'Missing payment code' };
     }
 
@@ -141,5 +138,35 @@ export class PaymentService {
       where: { userId },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  private extractPaymentCode(body: any): string | null {
+    const values = [
+      body.content,
+      body.description,
+      body.code,
+      body.transferContent,
+      body.transfer_content,
+      body.transfer_description,
+      body.transferDesc,
+      body.transferInfo,
+      body.transfer_info,
+      body.message,
+      body.msg,
+      body.note,
+      body.notes,
+      body.comment,
+      body.comments,
+      body.des,
+      body.requestId,
+      body.orderId,
+      body.reference,
+      body.ref,
+      body.partnerRef,
+    ].filter((value) => typeof value === 'string' && value.trim().length > 0);
+
+    const searchText = `${values.join(' ')} ${JSON.stringify(body || {})}`;
+    const codeMatch = searchText.match(/TDL[A-Z0-9]+/i);
+    return codeMatch ? codeMatch[0].toUpperCase() : null;
   }
 }

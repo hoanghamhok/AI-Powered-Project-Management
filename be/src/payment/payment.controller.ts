@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards, Headers, Param } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Req, UseGuards, Headers, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { PaymentService } from './payment.service';
@@ -17,6 +17,7 @@ export class PaymentController {
   }
 
   @Post('webhook')
+  @HttpCode(200)
   @ApiOperation({ summary: 'SePay Webhook' })
   async handleWebhook(@Headers() headers: any, @Body() body: any) {
     return this.paymentService.handleSePayWebhook(headers, body);

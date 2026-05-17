@@ -95,8 +95,11 @@ def extract_features():
         np.random.seed(int(row.name) % 2**32)
         
         score = 0
-        # Failure Outcome (Major risk)
+        # Deadline pressure should predict risk before the task is already late.
         if row['time_to_due'] < 0: score += 4
+        elif row['time_to_due'] <= 4: score += 3
+        elif row['time_to_due'] <= 12: score += 2
+        elif row['time_to_due'] <= 24: score += 1
         
         # Process signals (Blocks)
         if row['total_blocked_hours'] > 48: score += 3
@@ -112,10 +115,10 @@ def extract_features():
         if row['unresolved_dependencies'] >= 3: score += 3
         elif row['unresolved_dependencies'] >= 1: score += 1
         
-        # Workload signals (Adjusted for mean ~70)
-        if row['assignee_workload'] > 120: score += 3
-        elif row['assignee_workload'] > 85: score += 2
-        elif row['assignee_workload'] > 50: score += 1
+        # Workload signals
+        if row['assignee_workload'] > 50: score += 3
+        elif row['assignee_workload'] > 35: score += 2
+        elif row['assignee_workload'] > 20: score += 1
         
         # Efficiency Outcome
         if row['estimateHours'] > 0:
@@ -123,8 +126,8 @@ def extract_features():
             if efficiency > 2.5: score += 2
             elif efficiency > 1.5: score += 1
 
-        # Complexity/Clarity signals
-        if row['difficulty'] >= 4:
+        # Complexity/Clarity signals. Product difficulty is 1-3, so 3 is high.
+        if row['difficulty'] >= 3:
             if row['desc_length'] < 50: score += 1
             if row['comment_count'] < 2: score += 1
         

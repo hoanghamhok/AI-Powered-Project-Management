@@ -94,18 +94,55 @@ export class RiskPredictionService {
       const response = await firstValueFrom(
         this.httpService.post(this.predictionApiUrl, features)
       );
-      return Number(response.data?.riskScore ?? 0);
+      const modelScore = Number(response.data?.riskScore ?? 0);
+      return Math.max(modelScore, this.calculateHeuristicRiskFloor(features));
     } catch (error) {
       const errMsg = error instanceof Error ? error.message : JSON.stringify(error);
       this.logger.error(`Error calling Prediction API: ${errMsg}`);
-      // Heuristic fallback
-      let score = 0.1;
-      if (features.is_overdue) score += 0.5;
-      if (features.unresolved_dependencies >= 2) score += 0.2;
-      if (features.assignee_workload > 5) score += 0.15;
-      if (features.difficulty >= 4 && features.desc_length < 50) score += 0.2;
-      return Math.min(score, 1.0);
+      return this.calculateHeuristicRiskFloor(features);
     }
     
+  }
+
+  private calculateHeuristicRiskFloor(features: {
+    time_to_due: number;
+    is_overdue: number;
+    unresolved_dependencies: number;
+    assignee_workload: number;
+    estimateHours: number;
+    difficulty: number;
+    desc_length: number;
+    comment_count: number;
+    block_count: number;
+    blocked_ratio: number;
+    progress_ratio: number;
+  }): number {
+    let score = 0.05;
+
+    if (features.is_overdue) {
+      score += 0.55;
+    } else if (features.time_to_due <= 4) {
+      score += 0.35;
+    } else if (features.time_to_due <= 12) {
+      score += 0.25;
+    } else if (features.time_to_due <= 24) {
+      score += 0.15;
+    }
+
+    if (features.difficulty >= 3) score += 0.15;
+    if (features.difficulty >= 3 && features.desc_length < 50) score += 0.2;
+    if (features.difficulty >= 3 && features.comment_count === 0) score += 0.1;
+    if (!features.is_overdue && features.estimateHours > features.time_to_due) score += 0.15;
+
+    if (features.unresolved_dependencies >= 2) score += 0.2;
+    else if (features.unresolved_dependencies === 1) score += 0.1;
+
+    if (features.assignee_workload > 25) score += 0.15;
+    else if (features.assignee_workload > 15) score += 0.08;
+
+    if (features.block_count > 0 || features.blocked_ratio > 0.2) score += 0.15;
+    if (features.progress_ratio > 0.75 && features.time_to_due <= 24) score += 0.1;
+
+    return Math.min(score, 0.9);
   }
 }
