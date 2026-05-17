@@ -1,6 +1,9 @@
 import { Icon } from "./Icon";
+import { useNavigate } from "react-router-dom";
 
 export interface RiskRowProps {
+  taskId: string;
+  projectId: string;
   taskName: string;
   category: string;
   assignees: {
@@ -21,14 +24,19 @@ const shadow = {
 } as const;
 
 export function RiskRow({
-  taskName, category, assignees,
+  taskId, projectId, taskName, category, assignees,
   deadline, deadlineSub, deadlineColor, deadlineSubColor,
   statusLabel, statusBg, statusColor,
 }: RiskRowProps) {
+  const navigate = useNavigate();
+
   return (
-    <tr className="hover:bg-gray-50/60 transition-colors group border-t border-gray-100">
+    <tr 
+      className="hover:bg-gray-50/60 transition-colors group border-t border-gray-100 cursor-pointer"
+      onClick={() => navigate(`/projects/${projectId}`)}
+    >
       <td className="px-6 py-5">
-        <div className="font-bold text-sm text-gray-900">{taskName}</div>
+        <div className="font-bold text-sm text-gray-900 group-hover:text-blue-600 transition-colors">{taskName}</div>
         <div className="text-xs text-gray-400 mt-0.5">{category}</div>
       </td>
       <td className="px-6 py-5">
@@ -70,8 +78,10 @@ export function RiskRow({
         </span>
       </td>
       <td className="px-6 py-5 text-right">
-        <button className="p-1.5 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg hover:bg-gray-100">
-          <Icon name="more_horiz" className="text-gray-400" size={20} />
+        <button 
+          className="px-3 py-1.5 bg-gray-50 text-gray-600 text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 hover:bg-gray-900 hover:text-white transition-all"
+        >
+          View
         </button>
       </td>
     </tr>

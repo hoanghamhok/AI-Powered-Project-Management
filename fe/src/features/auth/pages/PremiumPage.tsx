@@ -142,9 +142,9 @@ export const PremiumPage: React.FC = () => {
   /* ── Render ───────────────────────────────────────── */
   return (
     <>
-      {/* Google Fonts – DM Serif Display + DM Sans */}
+      {/* Google Fonts – Playfair Display + DM Sans */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
       `}</style>
 
       <div style={styles.root}>
@@ -170,7 +170,7 @@ export const PremiumPage: React.FC = () => {
             </p>
 
             <div style={styles.priceRow}>
-              <span style={styles.priceNum}>2.000đ</span>
+              <span style={styles.priceNum}>19.000đ</span>
               <span style={styles.pricePer}>&nbsp;/ tháng</span>
             </div>
           </div>
@@ -408,7 +408,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '1rem',
   },
   heroTitle: {
-    fontFamily: "'DM Serif Display', serif",
+    fontFamily: "'Playfair Display', serif",
     fontSize: 28,
     color: '#1a1a1a',
     margin: '0 0 0.5rem',

@@ -36,11 +36,10 @@ export class AnalyticsService {
       }),
     );
 
-    // Sort by risk score descending and take top 5
+    // Sort by risk score descending
     return tasksWithRisk
       .sort((a, b) => b.riskScore - a.riskScore)
-      .filter((t) => t.riskScore > 0.3) // Filter some low risk if needed, or just take top 5
-      .slice(0, 5);
+      .filter((t) => t.riskScore > 0.3); // Filter tasks with risk score above 0.3
   }
 
 

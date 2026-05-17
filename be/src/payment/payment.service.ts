@@ -13,7 +13,7 @@ export class PaymentService {
   private readonly bankId: string;
   private readonly accNumber: string;
   private readonly apiKey: string;
-  private readonly premiumAmount = 2000;
+  private readonly premiumAmount = 19000;
   private readonly premiumDurationDays = 30;
 
   constructor(
@@ -58,7 +58,7 @@ export class PaymentService {
 
     const sepayId = body.id;
     const amount = Number(body.transferAmount || body.amount_in || body.amount || 0);
-    
+
     // Combine all possible text sources to search for the TDL code
     const searchText = `${body.content || ''} ${body.description || ''} ${body.code || ''}`;
     const codeMatch = searchText.match(/TDL[A-Z0-9]+/i);

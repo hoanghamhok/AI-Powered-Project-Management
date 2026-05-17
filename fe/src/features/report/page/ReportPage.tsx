@@ -112,6 +112,8 @@ export default function DashboardContent() {
     }));
 
     return {
+      taskId: task.id,
+      projectId: selectedProjectId,
       taskName: task.title,
       category: task.description ? (task.description.length > 40 ? task.description.substring(0, 40) + "..." : task.description) : "No description",
       assignees,
